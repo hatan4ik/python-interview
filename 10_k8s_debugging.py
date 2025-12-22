@@ -3,6 +3,34 @@ import sys
 import logging
 from typing import List, Dict, Optional
 
+"""
+-------------------------------------------------------------------------------
+KUBERNETES TEST ENVIRONMENT SETUP (Minikube)
+-------------------------------------------------------------------------------
+To run this script locally on macOS/Linux/Windows, you need a local Kubernetes cluster.
+We recommend 'minikube'.
+
+1. Install Prerequisites (macOS):
+   $ brew install minikube kubernetes-cli
+
+2. Start the Cluster:
+   $ minikube start
+
+   # If you encounter driver/version errors (common with old installs):
+   $ minikube delete
+   $ minikube start
+
+3. Install Python Dependencies:
+   $ pip3 install kubernetes
+
+4. Run the Script:
+   $ python3 10_k8s_debugging.py
+
+5. (Optional) Verify connectivity manually:
+   $ kubectl get nodes
+-------------------------------------------------------------------------------
+"""
+
 # Standard interview practice: Mention dependencies
 # Requires: pip install kubernetes
 try:

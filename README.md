@@ -55,6 +55,18 @@ python3 <script_name.py>
 python3 10_k8s_debugging.py
 ```
 
+### ☸️ Kubernetes Local Setup (For Script #10)
+
+To test `10_k8s_debugging.py` locally without a real cloud cluster:
+
+1.  **Install Minikube:** `brew install minikube` (macOS)
+2.  **Start Cluster:** `minikube start`
+3.  **Troubleshoot:** If `minikube start` fails due to version/driver issues:
+    ```bash
+    minikube delete && minikube start
+    ```
+4.  **Install Lib:** `pip3 install kubernetes`
+
 ---
 
 ## 💡 The "Why" - Python vs. Bash
