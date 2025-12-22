@@ -100,3 +100,87 @@ with open("file.txt") as f:
     data = f.read()
 # f.close() is called automatically here
 ```
+
+---
+
+## 6. Generators & `yield` (The Scaling Secret)
+
+**The Concept:**
+How do you read a 1 Terabyte log file if you only have 8GB of RAM?
+If you use a list `logs = f.readlines()`, your RAM will crash.
+
+**Generators** process data **one item at a time** (Lazy Evaluation).
+
+**Example:**
+```python
+def read_huge_file(filename):
+    with open(filename) as f:
+        for line in f:
+            yield line  # Pauses function here, returns value, saves state.
+
+# Usage
+for line in read_huge_file("huge_log.log"):
+    process(line)  # Only 1 line in memory at a time!
+```
+
+---
+
+## 7. Decorators (The Wrapper)
+
+**The Concept:**
+A way to modify the behavior of a function *without changing its code*. Used for logging, timing, or authentication.
+
+**Syntax:** The `@` symbol above a function.
+
+**Example (Retry Logic):**
+```python
+@retry(times=3)
+def connect_to_db():
+    # If this fails, the decorator automatically runs it again.
+    pass
+```
+
+---
+
+## 8. `try / except / else / finally` (Complete Error Handling)
+
+**The Concept:**
+Everyone knows `try/except`. But do you know `else` and `finally`?
+
+*   `try`: The risky code.
+*   `except`: What to do if it fails.
+*   `else`: Runs ONLY if the try block **succeeded**.
+*   `finally`: Runs **ALWAYS**, no matter what (even if the script crashes). Used for cleanup.
+
+**Interview Q:** "When does `finally` run?"
+**Answer:** "Always. Even if there is a `return` statement in the `try` block, `finally` runs before leaving."
+
+---
+
+## 9. Interpreted vs. Compiled (Why Python is "Slow")
+
+**The Concept:**
+*   **Compiled Languages (C++, Go, Java):** The code is translated into machine code (binary) *before* it runs. It is fast but requires a build step.
+*   **Interpreted Languages (Python, Bash):** An "Interpreter" program reads the code line-by-line and executes it on the fly.
+
+**Trade-off:** Python is slower to execute but much faster to *write* and *test* (no compile wait time).
+
+**Crucial Note:** Python actually compiles to "Bytecode" (.pyc files) first, then the Python Virtual Machine (PVM) interprets that. Mentioning `.pyc` files is a huge pro tip.
+
+---
+
+## 10. Iterable vs. Iterator (The Loop Logic)
+
+**The Confusion:**
+"I can loop over a list. Is a list an iterator?" -> **NO.**
+
+*   **Iterable**: A container that *can* be looped over. It has data inside.
+    *   Examples: `List`, `Tuple`, `String`, `Dict`.
+    *   Magic Method: Has `__iter__()`.
+*   **Iterator**: The tiny pointer object that tracks "where we are" in the loop.
+    *   Examples: The result of `iter(my_list)` or a generator.
+    *   Magic Method: Has `__next__()`.
+
+**Analogy:**
+*   **Iterable**: A Book. (Has pages, you can read it).
+*   **Iterator**: A Bookmark. (Tracks which page you are on).
