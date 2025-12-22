@@ -184,3 +184,63 @@ Everyone knows `try/except`. But do you know `else` and `finally`?
 **Analogy:**
 *   **Iterable**: A Book. (Has pages, you can read it).
 *   **Iterator**: A Bookmark. (Tracks which page you are on).
+
+---
+
+## 11. Unit Testing (Why we rely on `unittest` / `pytest`)
+
+**The Concept:**
+Writing a second script to check if your first script works.
+
+**Why bother?**
+1.  **Regression Prevention**: "I fixed bug A, but did I accidentally break feature B?" Tests tell you instantly.
+2.  **Documentation**: Tests show exactly how a function is *supposed* to be used.
+3.  **Refactoring Safety**: You can optimize code fearlessly if you have tests to prove it still produces the same result.
+
+**The Frameworks:**
+*   **`unittest`**: Built-in standard library. Great for interviews because it requires no installation. (Used in this repo).
+*   **`pytest`**: The industry standard. Cleaner syntax, powerful plugins. If asked "What do you use at work?", say `pytest`.
+
+**Key Terms:**
+*   `Assert`: "Make sure this is True." (e.g., `assertEqual(2+2, 4)`).
+*   `Mock`: "Fake" a database or API so your test runs fast and doesn't need the internet.
+
+---
+
+## 12. Versioning & Virtual Environments (Dependency Hell)
+
+**The Problem:**
+"I updated a library for Project A, but it broke Project B because Project B needs the old version."
+
+**The Solution:** Isolation.
+
+**1. Virtual Environments (`venv`):**
+A self-contained directory that contains a specific version of Python and a specific set of libraries.
+*   *Command:* `python3 -m venv .venv`
+*   *Why:* Keeps dependencies for Project A separate from Project B.
+
+**2. `requirements.txt`:**
+A file listing exactly which libraries (and versions) your project needs.
+*   *Content:* `requests==2.28.1`
+*   *Install:* `pip install -r requirements.txt`
+
+**3. Semantic Versioning (SemVer):**
+The industry standard for numbering versions: `Major.Minor.Patch` (e.g., `2.5.1`).
+*   **Major (2)**: Breaking changes. (Code might stop working).
+*   **Minor (5)**: New features, backward compatible.
+*   **Patch (1)**: Bug fixes only.
+
+---
+
+## 13. Jupyter Notebooks (The Interactive Runbook)
+
+**Common Confusion:**
+Often misheard as "Juniper" (which is a networking hardware company).
+**Jupyter** is a web-based tool for running Python code interactively.
+
+**Why DevOps Engineers use it:**
+1.  **Runbooks**: Instead of a static Wiki page, you create a Notebook where an engineer can click "Run" to execute diagnosis scripts.
+2.  **Post-Mortems**: You can graph CPU usage logs, show code snippets, and write text explanations all in one document.
+3.  **Data Analysis**: Great for visualizing log trends (using `pandas` and `matplotlib`).
+
+**Key File Extension:** `.ipynb`
