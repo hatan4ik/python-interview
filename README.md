@@ -32,6 +32,7 @@ Each script maps to a specific **competency** evaluated during the technical int
 | **`08_unit_tests.py`** | **Quality Assurance** | **CRITICAL:** Shows you write tests. This is the difference between a "Scripter" and an "Engineer". |
 | **`09_framework_showcase.py`**| **Ecosystem Awareness** | Highlights familiarity with industry standards like `boto3` (AWS) and `fastapi`. |
 | **`10_k8s_debugging.py`** | **Platform Engineering** | **NEW:** Programmatic Kubernetes debugging. Detecting `NotReady` nodes and `CrashLoopBackOff` pods using client libraries. |
+| **`11_k8s_chaos_generator.py`** | **Testing/QA** | **CHAOS ENGINEERING:** Intentionally breaks the cluster (OOM, CrashLoops, Bad PVCs) to verify your debugging tools. |
 
 ---
 
@@ -55,7 +56,26 @@ python3 <script_name.py>
 python3 10_k8s_debugging.py
 ```
 
-### ☸️ Kubernetes Local Setup (For Script #10)
+### 💥 Chaos Engineering (For Script #11)
+
+Use this to generate "interview problems" for yourself.
+
+1.  **Inject Failures:**
+    ```bash
+    python3 11_k8s_chaos_generator.py --mode all
+    ```
+    *Creates: CrashLoop Pods, OOM Pods, Stuck PVCs, Bad Services.*
+
+2.  **Debug:** Now run your `10_k8s_debugging.py` to see if it catches them!
+
+3.  **Cleanup:**
+    ```bash
+    python3 11_k8s_chaos_generator.py --mode clean
+    ```
+
+---
+
+## ☸️ Kubernetes Local Setup (For Script #10)
 
 To test `10_k8s_debugging.py` locally without a real cloud cluster:
 
