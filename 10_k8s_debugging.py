@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import logging
 from typing import List, Dict, Optional
