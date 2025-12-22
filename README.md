@@ -128,4 +128,5 @@ In an interview, you will be asked: *"Why use Python for this instead of a simpl
 Don't get caught off guard. Review these files before the call:
 
 *   **[PYTHON_CONCEPTS.md](./PYTHON_CONCEPTS.md)**: Explains `__name__ == "__main__"`, Iterators vs. Generators, and Context Managers (`with open(...)`).
+*   **[KUBERNETES_CONCEPTS.md](./KUBERNETES_CONCEPTS.md)**: **NEW:** Deep dive into Networking, Port Forwarding Myths, and Production Access Patterns.
 *   **[CHEAT_SHEET_PYTHON_VS_BASH.md](./CHEAT_SHEET_PYTHON_VS_BASH.md)**: A quick translation guide to map your Bash knowledge to Python.
