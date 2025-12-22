@@ -2,61 +2,47 @@ import urllib.request
 import urllib.error
 import json
 import time
+from http import HTTPStatus
+from typing import Any, Dict
 
 # ==========================================
 # SCENARIO:
-# Write a script to monitor the health of a microservice.
-# The service returns JSON: {"status": "ok", "uptime": 1234}
-# If status is not "ok" or if the request fails, alert the user.
+# API Health Check with Type Hints and HTTPStatus Enum.
 # ==========================================
 
-# NOTE: In a real job, use the 'requests' library (pip install requests).
-# It is much more human-friendly. e.g., requests.get(url).json()
-# However, knowing urllib (standard lib) is a great "flex" in interviews
-# if you are in a restricted environment.
+TARGET_URL = "https://httpbin.org/get"
 
-TARGET_URL = "https://httpbin.org/get" # Public echo service for testing
-
-def check_service_health(url):
+def check_service_health(url: str) -> bool:
     print(f"--- Checking Health of {url} ---")
     
     try:
-        # 1. MAKE THE REQUEST
-        # timeout is crucial for production scripts!
         with urllib.request.urlopen(url, timeout=5) as response:
             
-            # 2. CHECK HTTP STATUS
+            # MODERN: Use HTTPStatus enum instead of magic number 200
             status_code = response.getcode()
-            if status_code != 200:
+            if status_code != HTTPStatus.OK:
                 print(f"ALERT: Service returned status code {status_code}")
                 return False
             
-            # 3. PARSE JSON
             data = response.read()
-            json_data = json.loads(data)
+            # Type Hinting the parsed JSON for clarity
+            json_data: Dict[str, Any] = json.loads(data)
             
-            # Simulate checking a specific field (httpbin returns 'url', not 'status', adapting logic)
-            # In a real interview question: if json_data.get("status") == "ok": ...
             print("Response received successfully.")
             print(f"Server is reachable via: {json_data.get('url')}")
             return True
 
     except urllib.error.URLError as e:
-        # Handles DNS errors, connection refused, etc.
-        print(f"ALERT: Network error contacting service: {e}")
+        print(f"ALERT: Network error: {e}")
         return False
     except json.JSONDecodeError:
-        print("ALERT: Service returned invalid JSON.")
+        print("ALERT: Invalid JSON.")
         return False
     except Exception as e:
         print(f"ALERT: Unexpected error: {e}")
         return False
 
-# ==========================================
-# RETRY LOGIC (Very common interview follow-up)
-# "How would you handle transient failures?"
-# ==========================================
-def robust_health_check(url, retries=3, delay=2):
+def robust_health_check(url: str, retries: int = 3, delay: int = 2) -> bool:
     print(f"\n--- Robust Check with Retries ---")
     
     for attempt in range(1, retries + 1):

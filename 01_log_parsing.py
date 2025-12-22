@@ -1,17 +1,19 @@
 import re
 from collections import Counter
-from datetime import datetime
+from pathlib import Path
+from typing import Pattern
 
 # ==========================================
 # SCENARIO:
-# You have a server log file. 
-# 1. Parse the file to find all 500 (Server Error) status codes.
-# 2. Count the number of requests per IP address.
-# 3. Print the top 3 most frequent IPs.
+# Parse logs using Modern Python (3.10+) standards.
+# Key Modern Features:
+# 1. 'pathlib' for file handling (replaces 'os' and 'open' boilerplate)
+# 2. Type Hinting (str, Path, etc.)
+# 3. Walrus Operator (:=) for concise conditional assignments
 # ==========================================
 
-# 1. SETUP: Create a dummy log file for this exercise
-log_content = """
+# 1. SETUP: Create dummy log file using pathlib
+LOG_CONTENT = """
 192.168.1.1 - - [21/Dec/2025:10:00:01 +0000] "GET /home HTTP/1.1" 200 1024
 192.168.1.2 - - [21/Dec/2025:10:00:02 +0000] "GET /app HTTP/1.1" 500 512
 10.0.0.5 - - [21/Dec/2025:10:00:03 +0000] "POST /login HTTP/1.1" 200 4096
@@ -22,53 +24,40 @@ log_content = """
 192.168.1.100 - - [21/Dec/2025:10:00:08 +0000] "GET /config HTTP/1.1" 404 128
 """
 
-filename = "server.log"
-with open(filename, "w") as f:
-    f.write(log_content.strip())
+FILENAME = Path("server.log")
+FILENAME.write_text(LOG_CONTENT.strip(), encoding="utf-8")
 
 # ==========================================
 # SOLUTION
 # ==========================================
 
-def parse_logs(log_file):
+def parse_logs(log_file: Path) -> None:
     print(f"--- Analyzing {log_file} ---")
     
-    # Counter is a specialized dictionary designed for counting hashable objects.
-    # It's much cleaner than: if ip in dict: dict[ip] += 1 else: dict[ip] = 1
-    ip_counter = Counter()
-    server_errors = 0
+    ip_counter: Counter[str] = Counter()
+    server_errors: int = 0
     
-    # Regex Explanation:
-    # (\d+\.\d+\.\d+\.\d+)  -> Capture Group 1: Matches an IP address (digits.digits...)
-    # .*?                   -> Non-greedy match for anything in between
-    # "\w+ .*? HTTP/1.1"    -> Matches the method and path
-    # \s+                   -> Whitespace
-    # (\d{3})               -> Capture Group 2: The Status Code (3 digits)
-    log_pattern = re.compile(r'(\d+\.\d+\.\d+\.\d+).*?"\w+ .*? HTTP/1.1" (\d{3})')
+    # Pre-compiling regex is a standard optimization
+    log_pattern: Pattern[str] = re.compile(r'(\d+\.\d+\.\d+\.\d+).*?"\w+ .*? HTTP/1.1" (\d{3})')
 
     try:
-        # 'with' statement ensures file is closed automatically (Context Manager)
-        with open(log_file, 'r') as file:
+        # pathlib.open() is cleaner
+        with log_file.open("r", encoding="utf-8") as file:
             for line in file:
                 line = line.strip()
-                if not line: continue
+                if not line:
+                    continue
                 
-                # Approach 1: String Splitting (Simpler, faster for structured logs)
-                # parts = line.split()
-                # ip = parts[0]
-                # status = parts[-2]
-                
-                # Approach 2: Regex (More robust, good for messy logs)
-                match = log_pattern.search(line)
-                if match:
+                # OPTIMIZATION: Walrus Operator (:=)
+                # Assigns 'match' AND checks if it is truthy in one line.
+                # Available since Python 3.8, standard in 3.10+ styles.
+                if match := log_pattern.search(line):
                     ip = match.group(1)
                     status_code = match.group(2)
                     
-                    # Task 1: Count 500 errors
                     if status_code == '500':
                         server_errors += 1
                     
-                    # Task 2: Count requests per IP
                     ip_counter[ip] += 1
                     
     except FileNotFoundError:
@@ -81,11 +70,9 @@ def parse_logs(log_file):
     for ip, count in ip_counter.items():
         print(f"{ip}: {count}")
         
-    # Task 3: Top 3 IPs
     print("\nTop 3 Frequent IPs:")
-    # Counter.most_common(n) returns a list of (element, count) tuples
     for ip, count in ip_counter.most_common(3):
         print(f"  {ip}: {count} requests")
 
 if __name__ == "__main__":
-    parse_logs(filename)
+    parse_logs(FILENAME)
