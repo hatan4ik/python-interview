@@ -8,6 +8,7 @@
 This repository covers the spectrum from **Log Parsing** and **System Automation** to **Concurrency** and **Unit Testing**, providing both the code and the "why" behind it.
 
 ## 📚 Table of Contents
+- [00. Python Basics (Start Here)](#00-python-basics-start-here)
 - [01. Log Parsing & Regex](#01-log-parsing--regex)
 - [02. System Commands (Pathlib & Subprocess)](#02-system-commands--automation)
 - [03. API Health Checks (Resilience)](#03-api-health-checks)
@@ -17,9 +18,17 @@ This repository covers the spectrum from **Log Parsing** and **System Automation
 - [07. Concurrency & Scaling (Advanced)](#07-concurrency--scaling)
 - [08. Unit Testing & QA (Advanced)](#08-unit-testing--qa)
 - [Cheat Sheet: Python vs Bash](CHEAT_SHEET_PYTHON_VS_BASH.md)
+- [Concepts: The "No Surprises" Guide](PYTHON_CONCEPTS.md)
 - [References & Further Reading](#-references--links-to-work)
 
 ---
+
+### 00. Python Basics (Start Here)
+**File**: [`00_python_basics.py`](./00_python_basics.py)
+
+**The Task**: Learn the absolute fundamentals: Functions, Variables, and Loops.
+**Key Concepts**: `def` (Define Function), `return`, `if/else`, `for` loops.
+**Why it matters**: If you can't explain what `def` does, you won't pass. Start here to build confidence.
 
 ### 01. Log Parsing & Regex
 **File**: [`01_log_parsing.py`](./01_log_parsing.py)
