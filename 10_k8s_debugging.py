@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
         # 3. Application Layer Check (Pods in 'default' namespace)
         print("\n[Checking Application Stability...]")
-        check_pod_restarts(namespace="default", restart_threshold=3)
+        check_pod_restarts(namespace="default", restart_threshold=1)
 
         # 4. Storage Layer Check
         print("\n[Checking Storage...]")
