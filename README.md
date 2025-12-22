@@ -129,4 +129,5 @@ Don't get caught off guard. Review these files before the call:
 
 *   **[PYTHON_CONCEPTS.md](./PYTHON_CONCEPTS.md)**: Explains `__name__ == "__main__"`, Iterators vs. Generators, and Context Managers (`with open(...)`).
 *   **[KUBERNETES_CONCEPTS.md](./KUBERNETES_CONCEPTS.md)**: **NEW:** Deep dive into Networking, Port Forwarding Myths, and Production Access Patterns.
+*   **[GITOPS_TOOLS.md](./GITOPS_TOOLS.md)**: **NEW:** Comparison of ArgoCD vs. Flux CD and why "Push vs. Pull" matters.
 *   **[CHEAT_SHEET_PYTHON_VS_BASH.md](./CHEAT_SHEET_PYTHON_VS_BASH.md)**: A quick translation guide to map your Bash knowledge to Python.
