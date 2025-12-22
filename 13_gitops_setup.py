@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import subprocess
 import time
 import sys
