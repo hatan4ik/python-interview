@@ -89,6 +89,25 @@ To test `10_k8s_debugging.py` locally without a real cloud cluster:
     ```
 4.  **Install Lib:** `pip3 install kubernetes`
 
+### 🛠 Kubernetes Environment Management (Cheatsheet)
+
+When working with local clusters (especially when injecting Chaos), things break. Use these commands to manage your environment.
+
+| Action | Command | When to use? |
+| :--- | :--- | :--- |
+| **Start** | `minikube start` | Resume work. |
+| **Stop** | `minikube stop` | Save battery/RAM when not working. |
+| **Hard Reset** | `minikube delete --all && minikube start --memory=4096 --cpus=2` | **Fixes Everything.** Use if the cluster is stuck, API is timeout, or after heavy Chaos testing. |
+| **Status** | `minikube status` | Check if Control Plane is alive. |
+
+#### 🔁 The "Pro" Workflow
+The scripts in this repo are designed to work in a loop:
+
+1.  **Bring Up:** `python3 13_gitops_setup.py` (Installs ArgoCD + Apps)
+2.  **Break It:** `python3 11_k8s_chaos_generator.py --mode all` (Injects Failures)
+3.  **Detect It:** `python3 10_k8s_debugging.py` (Finds the issues)
+4.  **Fix It:** `python3 12_k8s_resolution_advisor.py` (Get the fix commands)
+
 ---
 
 ## 💡 The "Why" - Python vs. Bash
