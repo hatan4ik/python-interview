@@ -1,43 +1,54 @@
 #!/usr/bin/env python3
+"""
+Data Structures & Efficiency.
+
+This module highlights the performance differences between Python data structures.
+Key takeaway: Sets provide O(1) lookups, while Lists provide O(N).
+"""
+
 from typing import List, Set, TypedDict
 
-# ==========================================
-# SCENARIO:
-# Data Structures with TypedDict for structure definition.
-# ==========================================
-
-# MODERN: TypedDict (Python 3.8+)
-# Defines the expected keys and value types for a dictionary.
+# User definition for strong typing
 class User(TypedDict):
     name: str
     age: int
     role: str
 
 def list_vs_set_efficiency() -> None:
+    """
+    Demonstrates finding common elements (Intersection).
+    
+    Performance Note:
+        - List Intersection: O(N * M)
+        - Set Intersection:  O(min(N, M)) -> Significantly faster for large data.
+    """
     print("--- 1. Set Intersection (Common Elements) ---")
     
     dc1_servers: List[str] = ["server-alpha", "server-beta", "server-gamma", "server-delta"]
     dc2_servers: List[str] = ["server-beta", "server-epsilon", "server-delta", "server-zeta"]
     
-    # Type inference works well here, but explicit hints show intent
     set1: Set[str] = set(dc1_servers)
     set2: Set[str] = set(dc2_servers)
     
-    # O(min(len(s1), len(s2))) complexity
+    # intersection() is optimized in C
     common = set1 & set2
     
     print(f"Servers in both lists: {common}")
 
 def sorting_dictionaries() -> None:
+    """
+    Demonstrates sorting a list of dictionaries by a specific key.
+    Uses 'lambda' functions, a common interview requirement.
+    """
     print("\n--- 2. Sorting Dictionaries ---")
     
-    # The type hint 'List[User]' validates the structure of the dicts inside
     users: List[User] = [
         {"name": "Alice", "age": 30, "role": "DevOps"},
         {"name": "Bob", "age": 25, "role": "Developer"},
         {"name": "Charlie", "age": 35, "role": "Manager"}
     ]
     
+    # Sort in-place would use .sort(), but sorted() returns a new list
     sorted_users = sorted(users, key=lambda x: x['age'])
     
     print("Users sorted by age:")
@@ -45,11 +56,15 @@ def sorting_dictionaries() -> None:
         print(f"  {u['name']}: {u['age']}")
 
 def cleaning_data() -> None:
+    """
+    Demonstrates data cleaning using Set Comprehensions.
+    Removes duplicates and normalizes whitespace/casing in one pass.
+    """
     print("\n--- 3. List Comprehensions & Cleaning ---")
     
     raw_tags: List[str] = [" PROD ", "dev", "Test", "PROD", "  dev  ", "staging"]
     
-    # Set comprehension for unique values
+    # Set comprehension {} automatically handles deduplication
     cleaned_tags: Set[str] = {tag.strip().lower() for tag in raw_tags} 
     
     print(f"Raw tags: {raw_tags}")

@@ -1,38 +1,61 @@
 #!/usr/bin/env python3
+"""
+Algorithmic Warmup.
+
+Classic 'Phone Screen' questions.
+1. Balanced Brackets (Stack usage).
+2. FizzBuzz (Modulo arithmetic).
+"""
+
 from typing import List, Dict
 
-# ==========================================
-# SCENARIO:
-# Algorithms with Type Hints.
-# ==========================================
-
 def is_balanced(s: str) -> bool:
+    """
+    Determines if the brackets in a string are balanced.
+    
+    Example:
+        "{}" -> True
+        "{[}]" -> False
+
+    Args:
+        s (str): Input string containing brackets.
+
+    Returns:
+        bool: True if balanced, False otherwise.
+    """
     print(f"Checking: '{s}'")
     
     stack: List[str] = []
-    
-    # Mapping closing -> opening
     mapping: Dict[str, str] = {')': '(', '}': '{', ']': '['}
     
     for char in s:
-        if char in mapping.values():
-            stack.append(char)
-        elif char in mapping:
-            # Walrus operator to check empty stack AND pop in safe way? 
-            # (Standard logic is actually cleaner here, keeping it simple)
-            if not stack:
-                return False
+        # If it's a closing bracket
+        if char in mapping:
+            # Pop the top element if stack is not empty, else assign dummy value '#'
+            top_element = stack.pop() if stack else '#'
             
-            top_element = stack.pop()
-            
+            # If the mapped opening bracket doesn't match the top element -> Fail
             if mapping[char] != top_element:
                 return False
+        # If it's an opening bracket (values of the map)
+        elif char in mapping.values():
+            stack.append(char)
         else:
+            # Non-bracket characters are ignored
             continue
             
-    return len(stack) == 0
+    return not stack
 
 def devops_fizzbuzz(n: int = 15) -> None:
+    """
+    Prints numbers 1 to n with replacements:
+    - Divisible by 3 -> "Dev"
+    - Divisible by 5 -> "Ops"
+    - Both -> "DevOps"
+
+    Args:
+        n (int): The number to count up to.
+    """
     print(f"\n--- DevOps FizzBuzz (n={n}) ---")
     results: List[str] = []
     
@@ -43,7 +66,6 @@ def devops_fizzbuzz(n: int = 15) -> None:
         if i % 5 == 0:
             output += "Ops"
         
-        # 'or' short-circuit optimization
         results.append(output or str(i))
         
     print(", ".join(results))
@@ -51,6 +73,5 @@ def devops_fizzbuzz(n: int = 15) -> None:
 if __name__ == "__main__":
     print(f"Result: {is_balanced('{[]}')}\n")   # True
     print(f"Result: {is_balanced('{[}]')}\n")   # False
-    print(f"Result: {is_balanced('(((')}\n")    # False
     
     devops_fizzbuzz()

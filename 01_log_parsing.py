@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
+"""
+Log Parsing & Analysis Module.
+
+This script demonstrates high-performance log parsing techniques suitable for
+DevOps interviews. It covers:
+1. Regex pattern compilation for efficiency.
+2. Generator-like line processing.
+3. Memory-efficient counting using collections.Counter.
+"""
+
 import re
 from collections import Counter
 from pathlib import Path
 from typing import Pattern
 
 # ==========================================
-# SCENARIO:
-# Parse logs using Modern Python (3.10+) standards.
-# Key Modern Features:
-# 1. 'pathlib' for file handling (replaces 'os' and 'open' boilerplate)
-# 2. Type Hinting (str, Path, etc.)
-# 3. Walrus Operator (:=) for concise conditional assignments
+# SETUP: Create dummy log file
 # ==========================================
-
-# 1. SETUP: Create dummy log file using pathlib
 LOG_CONTENT = """
 192.168.1.1 - - [21/Dec/2025:10:00:01 +0000] "GET /home HTTP/1.1" 200 1024
 192.168.1.2 - - [21/Dec/2025:10:00:02 +0000] "GET /app HTTP/1.1" 500 512
@@ -28,30 +31,39 @@ LOG_CONTENT = """
 FILENAME = Path("server.log")
 FILENAME.write_text(LOG_CONTENT.strip(), encoding="utf-8")
 
-# ==========================================
-# SOLUTION
-# ==========================================
 
 def parse_logs(log_file: Path) -> None:
+    """
+    Parses a web server log file to extract traffic metrics.
+
+    Args:
+        log_file (Path): The path to the log file to read.
+
+    Returns:
+        None: Prints analysis results directly to stdout.
+
+    Raises:
+        FileNotFoundError: If the specified log_file does not exist.
+    """
     print(f"--- Analyzing {log_file} ---")
     
     ip_counter: Counter[str] = Counter()
     server_errors: int = 0
     
-    # Pre-compiling regex is a standard optimization
+    # Compile Regex once outside the loop for O(1) reuse.
+    # Group 1: IP Address (\d+...)
+    # Group 2: Status Code (\d{3})
     log_pattern: Pattern[str] = re.compile(r'(\d+\.\d+\.\d+\.\d+).*?"\w+ .*? HTTP/1.1" (\d{3})')
 
     try:
-        # pathlib.open() is cleaner
+        # Open with encoding explicitly specified for cross-platform safety
         with log_file.open("r", encoding="utf-8") as file:
             for line in file:
                 line = line.strip()
                 if not line:
                     continue
                 
-                # OPTIMIZATION: Walrus Operator (:=)
-                # Assigns 'match' AND checks if it is truthy in one line.
-                # Available since Python 3.8, standard in 3.10+ styles.
+                # Walrus Operator (:=) checks match and assigns it in one step.
                 if match := log_pattern.search(line):
                     ip = match.group(1)
                     status_code = match.group(2)
@@ -62,7 +74,7 @@ def parse_logs(log_file: Path) -> None:
                     ip_counter[ip] += 1
                     
     except FileNotFoundError:
-        print("Error: File not found.")
+        print(f"Error: The file {log_file} was not found.")
         return
 
     print(f"Total 500 Errors found: {server_errors}")
