@@ -244,3 +244,23 @@ Often misheard as "Juniper" (which is a networking hardware company).
 3.  **Data Analysis**: Great for visualizing log trends (using `pandas` and `matplotlib`).
 
 **Key File Extension:** `.ipynb`
+
+---
+
+## 14. Essential Frameworks (The "Big Three" for DevOps)
+
+You don't need to be a full-stack dev, but you **MUST** know these:
+
+**1. Flask / FastAPI (Microservices)**
+*   *What:* Lightweight web frameworks.
+*   *Use Case:* Creating a simple API endpoint to receive webhooks (e.g., "When GitHub pushes code, hit this URL to trigger a deploy").
+*   *Interview:* "How would you build a simple health check API?" -> "I'd use **FastAPI** because it's async and has built-in validation."
+
+**2. Requests (The Client)**
+*   *What:* The standard library for *making* HTTP calls (checking if a site is up).
+*   *Why:* It's much easier than the built-in `urllib`.
+
+**3. Boto3 (The Cloud)**
+*   *What:* The official AWS SDK for Python.
+*   *Use Case:* "Write a script to delete all old S3 buckets."
+*   *Interview:* If you see "AWS" on the job description, you **will** use Boto3.

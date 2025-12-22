@@ -17,75 +17,18 @@ This repository covers the spectrum from **Log Parsing** and **System Automation
 - [06. Bash Alternatives (The "Right Tool" Check)](#06-bash-alternatives)
 - [07. Concurrency & Scaling (Advanced)](#07-concurrency--scaling)
 - [08. Unit Testing & QA (Advanced)](#08-unit-testing--qa)
+- [09. Framework Showcase (Requests, Boto3, FastAPI)](#09-framework-showcase)
 - [Cheat Sheet: Python vs Bash](CHEAT_SHEET_PYTHON_VS_BASH.md)
 - [Concepts: The "No Surprises" Guide](PYTHON_CONCEPTS.md)
-- [References & Further Reading](#-references--links-to-work)
 
 ---
 
-### 00. Python Basics (Start Here)
-**File**: [`00_python_basics.py`](./00_python_basics.py)
+### 09. Framework Showcase
+**File**: [`09_framework_showcase.py`](./09_framework_showcase.py)
 
-**The Task**: Learn the absolute fundamentals: Functions, Variables, and Loops.
-**Key Concepts**: `def` (Define Function), `return`, `if/else`, `for` loops.
-**Why it matters**: If you can't explain what `def` does, you won't pass. Start here to build confidence.
-
-### 01. Log Parsing & Regex
-**File**: [`01_log_parsing.py`](./01_log_parsing.py)
-
-**The Task**: Parse a raw access log to count 500 errors and find the top traffic sources.
-**Key Concepts**: `re` (Regex), `collections.Counter`, `pathlib`.
-**Why it matters**: This is the #1 DevOps interview question. It tests your ability to turn unstructured text into structured metrics.
-
-### 02. System Commands & Automation
-**File**: [`02_system_commands.py`](./02_system_commands.py)
-
-**The Task**: Monitor disk usage and traverse directory trees to find large files.
-**Key Concepts**: `subprocess.run` (Safe Shelling), `shlex.split`, `Path.rglob` (Recursive Search).
-**Why it matters**: Replaces fragile shell scripts with robust, cross-platform Python.
-
-### 03. API Health Checks
-**File**: [`03_api_checks.py`](./03_api_checks.py)
-
-**The Task**: Monitor a microservice's JSON endpoint with retry logic for network resilience.
-**Key Concepts**: `urllib` (Standard Lib), `http.HTTPStatus`, `json` parsing, `time.sleep` (Backoff).
-**Why it matters**: Demonstrates how you handle distributed systems and transient failures.
-
-### 04. Data Structures & Efficiency
-**File**: [`04_data_structures.py`](./04_data_structures.py)
-
-**The Task**: Efficiently sort users and find common servers between clusters.
-**Key Concepts**: `Set` Intersection (O(1) vs O(N)), `TypedDict`, Lambda sorting keys.
-**Why it matters**: Shows you care about performance and complexity, not just "getting it to work."
-
-### 05. Algorithms Warmup
-**File**: [`05_algorithm_warmup.py`](./05_algorithm_warmup.py)
-
-**The Task**: Validate configuration syntax (Balanced Brackets) and logic loops (FizzBuzz).
-**Key Concepts**: Stack (LIFO) data structures, Modulo arithmetic.
-**Why it matters**: Validating JSON/YAML/HCL config files is a daily task for SREs.
-
-### 06. Bash Alternatives
-**File**: [`06_bash_alternatives.sh`](./06_bash_alternatives.sh)
-
-**The Task**: Solve the exact same problems using `awk`, `sed`, `grep`, and `curl`.
-**Key Concepts**: Unix Pipes, Text Stream Processing.
-**Why it matters**: Knowing *when* to use Bash vs Python is the mark of a Senior Engineer.
-> **See the Guide**: [Python vs Bash Cheat Sheet](./CHEAT_SHEET_PYTHON_VS_BASH.md)
-
-### 07. Concurrency & Scaling
-**File**: [`07_concurrency.py`](./07_concurrency.py)
-
-**The Task**: Check health status of multiple servers in parallel.
-**Key Concepts**: `concurrent.futures.ThreadPoolExecutor`, I/O Bound vs CPU Bound.
-**Why it matters**: "How does this script scale to 10,000 servers?" This is the answer.
-
-### 08. Unit Testing & QA
-**File**: [`08_unit_tests.py`](./08_unit_tests.py)
-
-**The Task**: Verify the correctness of the algorithms without running them manually.
-**Key Concepts**: `unittest` framework, Edge case coverage.
-**Why it matters**: Code without tests is technical debt. This proves you write production-grade software.
+**The Task**: Code examples for the "Big Three" DevOps frameworks: **Requests** (HTTP), **Boto3** (AWS), and **FastAPI**.
+**Key Concepts**: External Libraries, Mocking (simulating cloud/web calls).
+**Why it matters**: These are the specific tools 90% of DevOps jobs require. Knowing the syntax by heart is a superpower.
 
 ---
 
