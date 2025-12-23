@@ -70,6 +70,18 @@ python3 <script_name.py>
 python3 scripts/10_k8s_debugging.py
 ```
 
+### 🧪 Verification (Tests)
+
+Prove the code works without needing a live cluster. This runs the `unittest` suite located in `tests/`.
+
+```bash
+# Ensure the 'src' directory is in your python path
+export PYTHONPATH=$PYTHONPATH:$(pwd)/src 
+
+# Run the tests
+python3 -m unittest discover tests
+```
+
 ### 💥 Chaos Engineering (For Script #11)
 
 Use this to generate "interview problems" for yourself.
