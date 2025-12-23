@@ -59,12 +59,12 @@ Use the code in this repository to demonstrate these concepts.
 2.  `src/devops_toolkit/system.py` (The shared logic).
 3.  `tests/` (The quality assurance).
 
-## 5. Git Mastery
+## 5. Git Mastery & Deployment Strategies
 
 **Question:** "How do you handle Git in production and during incidents?"
 **Answer:** "I optimize for safety and rollback. I do not rewrite shared history; I use `revert` on main, `reflog` for recovery, and `bisect` to pinpoint regressions. In GitOps, I roll back by reverting Git so the cluster converges back to the desired state."
 
-*   **Deep Dive:** See **[GIT_INTERVIEW_GUIDE.md](./GIT_INTERVIEW_GUIDE.md)** for senior-level Q/A, recovery playbooks, and tradeoffs.
+*   **Deep Dive:** See **[ADVANCED_DEPLOYMENT_STRATEGIES.md](./ADVANCED_DEPLOYMENT_STRATEGIES.md)** for senior-level Q/A (Blue/Green, Canary) and Git recovery playbooks.
 
 ## 6. Mock Interview Questions (To Ask Yourself)
 
