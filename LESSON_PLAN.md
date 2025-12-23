@@ -22,7 +22,7 @@ Based on common DevOps interview patterns and Verisign's specific focus on infra
 
 We have prepared 5 executable Python examples in this directory. Run them, read the code, and understand the logic.
 
-1.  `01_log_parsing.py`: The "FizzBuzz" of DevOps. Essential.
-2.  `02_system_commands.py`: How to replace Bash scripts with Python.
-3.  `03_api_checks.py`: Monitoring and JSON handling.
+1.  `scripts/01_log_parsing.py`: The "FizzBuzz" of DevOps. Essential.
+2.  `scripts/02_system_commands.py`: How to replace Bash scripts with Python.
+3.  `scripts/03_api_checks.py`: Monitoring and JSON handling.
 4.  **Review the code comments**: They contain the "why" and "how" explanations you should give during the interview.
