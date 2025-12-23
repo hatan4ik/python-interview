@@ -134,3 +134,4 @@ Don't get caught off guard. Review these files before the call:
 *   **[GITOPS_TOOLS.md](./GITOPS_TOOLS.md)**: **NEW:** Comparison of ArgoCD vs. Flux CD and why "Push vs. Pull" matters.
 *   **[FLUXCD_OPERATIONS.md](./FLUXCD_OPERATIONS.md)**: **NEW:** Cheat sheet for operating Flux via CLI and Kubectl (Reconcile, Suspend, Debug).
 *   **[CHEAT_SHEET_PYTHON_VS_BASH.md](./CHEAT_SHEET_PYTHON_VS_BASH.md)**: A quick translation guide to map your Bash knowledge to Python.
+*   **[FROM_SCRIPT_TO_MODULE.md](./FROM_SCRIPT_TO_MODULE.md)**: **MUST READ:** The narrative of how we refactored this repo from simple scripts to a modular engineering project (DRY, Shared Libs).
