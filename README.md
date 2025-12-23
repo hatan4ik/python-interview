@@ -42,6 +42,16 @@ Each script maps to a specific **competency** evaluated during the technical int
 
 ## 🚀 Execution Instructions
 
+### ✨ One-Click Setup (Recommended)
+Don't waste time running commands manually. Use the bootstrapper to set up Minikube + ArgoCD + FluxCD in one go:
+
+```bash
+python3 scripts/99_complete_setup.py
+```
+*   Checks for prerequisites (minikube, kubectl).
+*   Starts the cluster if it's down.
+*   Installs both GitOps tools idempotently.
+
 **Golden Rule:** Never run Python scripts as if they were Bash scripts.
 
 **❌ The Wrong Way:**
