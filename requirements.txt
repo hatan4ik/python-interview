@@ -83,7 +83,7 @@ Faker==33.3.1
 fakeredis==2.23.0
 fastapi==0.115.0
 fastjsonschema==2.21.2
-filelock==3.20.0
+filelock==3.20.1
 filetype==1.2.0
 findpython==0.7.1
 flake8==7.1.1
