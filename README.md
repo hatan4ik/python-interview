@@ -36,6 +36,7 @@ Each script maps to a specific **competency** evaluated during the technical int
 | **`scripts/12_k8s_resolution_advisor.py`** | **Automation/Remediation** | **AUTO-FIX:** Scans for issues detected by script #10 and generates the exact `kubectl` commands to fix them. |
 | **`scripts/13_gitops_setup.py`** | **CI/CD / GitOps** | **DEPLOYMENT:** Installs ArgoCD and deploys a sample App (Guestbook) using GitOps principles. |
 | **`scripts/14_fluxcd_setup.py`** | **CI/CD / GitOps** | **ALTERNATIVE:** Installs Flux CD (The "CLI-first" alternative to Argo) and deploys "Podinfo". |
+| **`scripts/15_flux_python_manager.py`** | **Advanced Automation** | **PRO TOOL:** Controls Flux programmatically (Sync, Suspend) using Python CRDs instead of the CLI. |
 
 ---
 

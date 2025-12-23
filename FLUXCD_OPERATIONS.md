@@ -109,4 +109,39 @@ Flux expects a specific repo structure (Monorepo approach is common):
   /prod/
     flux-system/ # Flux components
     podinfo-kustomization.yaml  # Points to /apps/podinfo
+
+## 6. Python Integration (The Engineering Way)
+
+**Interview Question:** *"How would you build a custom dashboard to manage Flux without shelling out to the CLI?"*
+
+**Answer:** Flux resources (`GitRepository`, `Kustomization`) are just **Kubernetes Custom Resource Definitions (CRDs)**. You don't need a specific Flux library; you just need the standard `kubernetes` Python client.
+
+See **`scripts/15_flux_python_manager.py`** for a full working example.
+
+### Key Concept: CustomObjectsApi
+Use `CustomObjectsApi` to manipulate Flux resources directly.
+
+```python
+from kubernetes import client, config
+
+# 1. Trigger a Sync (Reconcile)
+# Flux watches the 'reconcile.fluxcd.io/requestedAt' annotation.
+def force_sync(name, namespace):
+    api = client.CustomObjectsApi()
+    patch = {
+        "metadata": {
+            "annotations": {
+                "reconcile.fluxcd.io/requestedAt": datetime.now().isoformat()
+            }
+        }
+    }
+    api.patch_namespaced_custom_object(
+        group="kustomize.toolkit.fluxcd.io",
+        version="v1",
+        namespace=namespace,
+        plural="kustomizations",
+        name=name,
+        body=patch
+    )
+```
 ```
