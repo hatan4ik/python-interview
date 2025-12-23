@@ -27,6 +27,14 @@ def run_cmd(cmd: str, shell=False):
 def install_flux():
     logger.info("🚀 Starting Flux CD Installation...")
 
+    # 0. Pre-flight Check
+    try:
+        subprocess.run("kubectl get namespace flux-system", shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        logger.info("✅ Flux CD namespace found. Skipping installation steps.")
+        return
+    except subprocess.CalledProcessError:
+        logger.info("Flux CD not found. Proceeding with installation.")
+
     # 1. Install Flux Manifests (The "Non-Bootstrap" way for Demos)
     # This installs the Source Controller, Kustomize Controller, Helm Controller, etc.
     logger.info("Applying Flux CD Manifests (Latest)...")

@@ -23,6 +23,14 @@ def run_cmd(cmd: str, shell=False):
 def install_argocd():
     logger.info("🚀 Starting ArgoCD Installation...")
 
+    # 0. Pre-flight Check
+    try:
+        subprocess.run("kubectl get namespace argocd", shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        logger.info("✅ ArgoCD namespace found. Skipping installation steps.")
+        return
+    except subprocess.CalledProcessError:
+        logger.info("ArgoCD not found. Proceeding with installation.")
+
     # 1. Create Namespace
     logger.info("Creating 'argocd' namespace...")
     run_cmd("kubectl create namespace argocd", shell=True) # Shell=True to ignore error if exists
