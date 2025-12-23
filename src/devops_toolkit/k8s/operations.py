@@ -11,7 +11,7 @@ def check_minikube_running() -> bool:
     if not check_binary_exists("minikube"):
         return False
     try:
-        run_command("minikube status", check=True, capture_output=True)
+        run_command(["minikube", "status"], check=True, capture_output=True)
         return True
     except subprocess.CalledProcessError:
         return False
@@ -32,7 +32,7 @@ def ensure_namespace(namespace: str):
     logger.info(f"Ensuring namespace '{namespace}' exists...")
     # Check if exists first to avoid noisy 'already exists' errors if we were just to create
     try:
-        run_command(f"kubectl get namespace {namespace}", check=True, capture_output=True)
+        run_command(["kubectl", "get", "namespace", namespace], check=True, capture_output=True)
         logger.debug(f"Namespace '{namespace}' already exists.")
     except subprocess.CalledProcessError:
         logger.info(f"Creating namespace '{namespace}'...")
