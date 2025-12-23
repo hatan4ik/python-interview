@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "devops_toolkit"
+version = "0.1.0"
+description = "A DevOps toolkit for Kubernetes interviews and automation."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "kubernetes>=29.0.0",
+    "requests",
+    "pyyaml"
+]
+authors = [
+  {name = "Nathanels", email = "nathanels@example.com"}
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+    "black"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

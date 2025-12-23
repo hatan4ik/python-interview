@@ -3,35 +3,23 @@ import subprocess
 import time
 import sys
 import os
-import logging
+import base64
+from pathlib import Path
 
-# Allow importing from local utils package
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add src to path so we can import devops_toolkit without installing it
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'))
+sys.path.append(SRC_PATH)
 
 try:
-    from utils.logging_config import setup_logger
-except ImportError:
-    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    from devops_toolkit.utils.logging import setup_logger
+    from devops_toolkit.system import run_command, check_binary_exists
+    from devops_toolkit.k8s.operations import ensure_namespace, wait_for_deployment
+except ImportError as e:
+    print(f"Error: Could not import devops_toolkit. {e}")
     sys.exit(1)
 
 # Configure Logging
 logger = setup_logger("GitOpsSetup")
-
-def run_cmd(cmd: str, shell=False):
-    """Runs a shell command and checks for errors."""
-    try:
-        # Split command for safety unless shell=True
-        if not shell:
-            cmd = cmd.split()
-        return subprocess.run(cmd, check=True, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Command failed: {cmd}")
-        logger.error(f"Error: {e.stderr.decode().strip()}")
-        raise
-
-def ensure_namespace(namespace: str) -> None:
-    logger.info(f"Ensuring namespace '{namespace}' exists...")
-    run_cmd(f"kubectl create namespace {namespace} --dry-run=client -o yaml | kubectl apply -f -", shell=True)
 
 def install_argocd():
     logger.info("🚀 Starting ArgoCD Installation...")
@@ -41,13 +29,13 @@ def install_argocd():
 
     # 2. Install ArgoCD Manifests
     logger.info("Applying ArgoCD Manifests (Stable)...")
-    run_cmd("kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml", shell=True)
+    run_command("kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml", shell=True)
 
     # 3. Wait for Components
     logger.info("⏳ Waiting for ArgoCD Server to be Ready (this may take 2-3 mins)...")
     # We wait for the repo-server first as a health indicator
-    run_cmd("kubectl wait --for=condition=available deployment/argocd-repo-server -n argocd --timeout=300s", shell=True)
-    run_cmd("kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s", shell=True)
+    wait_for_deployment("argocd-repo-server", "argocd")
+    wait_for_deployment("argocd-server", "argocd")
     
     logger.info("✅ ArgoCD Core Services are Ready.")
 
@@ -82,7 +70,7 @@ spec:
     app_path = Path("argocd_app.yaml")
     app_path.write_text(app_manifest)
     try:
-        run_cmd(f"kubectl apply -f {app_path}")
+        run_command(f"kubectl apply -f {app_path}", shell=True)
     finally:
         app_path.unlink(missing_ok=True)
     logger.info("✅ Application 'guestbook' registered in ArgoCD.")
@@ -100,28 +88,28 @@ def get_admin_password(retries: int = 10, delay_seconds: int = 3) -> str:
         "jsonpath={.data.password}",
     ]
     for attempt in range(1, retries + 1):
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if result.returncode == 0 and result.stdout.strip():
-            try:
-                return base64.b64decode(result.stdout.strip()).decode().strip()
-            except Exception:
-                logger.error("Failed to decode admin password.")
-                return ""
+        try:
+            result = run_command(cmd, capture_output=True)
+            if result.stdout.strip():
+                try:
+                    return base64.b64decode(result.stdout.strip()).decode().strip()
+                except Exception:
+                    logger.error("Failed to decode admin password.")
+                    return ""
+        except subprocess.CalledProcessError:
+            pass
+        
         if attempt < retries:
             time.sleep(delay_seconds)
     logger.warning("Admin password not available yet.")
     return ""
 
 def main() -> int:
-    configure_logging()
     print("--- GitOps (ArgoCD) Installer for Minikube ---")
     
-    # Check if kubectl exists
-    try:
-        subprocess.run(["kubectl", "version", "--client"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except FileNotFoundError:
-        logger.error("kubectl not found. Please install it first.")
-        return 1
+    if not check_binary_exists("kubectl"):
+         logger.error("kubectl not found. Please install it first.")
+         return 1
 
     try:
         install_argocd()

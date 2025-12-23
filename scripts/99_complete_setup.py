@@ -15,59 +15,35 @@ and it will only do the work that is missing.
 import subprocess
 import sys
 import os
-import shutil
-import time
-import logging
 
-# Allow importing from local utils package
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add src to path so we can import devops_toolkit without installing it
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'))
+sys.path.append(SRC_PATH)
 
 try:
-    from utils.logging_config import setup_logger
-except ImportError:
-    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    from devops_toolkit.utils.logging import setup_logger
+    from devops_toolkit.system import check_binary_exists, run_command
+    from devops_toolkit.k8s.operations import start_minikube
+except ImportError as e:
+    print(f"Error: Could not import devops_toolkit. {e}")
     sys.exit(1)
 
 # Configure Logging
 logger = setup_logger("Bootstrap")
-
-def check_command(cmd: str):
-    """Verifies that a required binary is installed."""
-    if not shutil.which(cmd):
-        logger.error(f"❌ Critical Error: '{cmd}' is not installed.")
-        logger.info(f"Please install '{cmd}' and try again.")
-        sys.exit(1)
-
-def run_cmd(cmd: str, check=True):
-    """Runs a shell command."""
-    try:
-        subprocess.run(cmd, shell=True, check=check)
-    except subprocess.CalledProcessError:
-        logger.error(f"Failed to execute: {cmd}")
-        if check:
-            sys.exit(1)
-
-def check_minikube_status():
-    """Checks if Minikube is running, starts it if not."""
-    logger.info("🔍 Checking Minikube status...")
-    
-    try:
-        # Check if running
-        subprocess.run("minikube status", shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        logger.info("✅ Minikube is already running.")
-    except subprocess.CalledProcessError:
-        logger.info("🚀 Minikube is NOT running. Starting it now...")
-        # Start with enough resources for both Argo and Flux
-        run_cmd("minikube start --memory=4096 --cpus=2 --driver=docker")
-        logger.info("✅ Minikube started successfully.")
 
 def run_setup_script(script_name: str):
     """Executes another Python setup script in the same directory."""
     logger.info(f"👉 triggering {script_name}...")
     try:
         # Assumes the script is in the same directory
-        script_path = f"scripts/{script_name}"
-        subprocess.run([sys.executable, script_path], check=True)
+        script_path = os.path.join(os.path.dirname(__file__), script_name)
+        
+        # Pass the current PYTHONPATH or set it to include src
+        env = os.environ.copy()
+        current_pythonpath = env.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = f"{SRC_PATH}:{current_pythonpath}"
+
+        subprocess.run([sys.executable, script_path], check=True, env=env)
     except subprocess.CalledProcessError:
         logger.error(f"❌ {script_name} failed.")
         sys.exit(1)
@@ -76,12 +52,13 @@ if __name__ == "__main__":
     print("\n--- 🛠  INTERVIEW ENVIRONMENT BOOTSTRAPPER 🛠  ---\n")
 
     # 1. Prerequisite Checks
-    check_command("minikube")
-    check_command("kubectl")
-    check_command("python3")
+    for cmd in ["minikube", "kubectl", "python3"]:
+        if not check_binary_exists(cmd):
+            logger.error(f"❌ Critical Error: '{cmd}' is not installed.")
+            sys.exit(1)
 
     # 2. Infrastructure Layer
-    check_minikube_status()
+    start_minikube()
 
     # 3. Application Layer (GitOps)
     print("\n[ Installing ArgoCD ]")

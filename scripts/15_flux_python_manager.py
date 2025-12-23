@@ -1,36 +1,22 @@
 #!/usr/bin/env python
-"""
-Flux CD Python Manager (The "Engineering" Way)
-
-In an interview, you might be asked: "How do you automate Flux without shelling out to the CLI?"
-
-Answer: "Flux resources are just Kubernetes Custom Resource Definitions (CRDs). 
-We can use the standard Kubernetes Python client to Create, Read, Update, and Delete them."
-
-This script demonstrates:
-1. Listing all Flux GitRepositories.
-2. Triggering a Reconciliation (Force Sync) via Annotation patching.
-3. Suspending a Kustomization programmatically.
-"""
-
 import sys
 import os
-import logging
-import datetime
-from typing import Dict, Any
+import time
+from pprint import pformat
 
-# Allow importing from local utils package
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add src to path so we can import devops_toolkit without installing it
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'))
+sys.path.append(SRC_PATH)
 
 try:
-    from utils.k8s_client import load_k8s_config, get_custom_objects_api
-    from utils.logging_config import setup_logger
+    from devops_toolkit.k8s.client import load_k8s_config, get_custom_objects_api
+    from devops_toolkit.utils.logging import setup_logger
     from kubernetes.client.rest import ApiException
-except ImportError:
-    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+except ImportError as e:
+    print(f"Error: Could not import devops_toolkit. {e}")
     sys.exit(1)
 
-# Configure Logging
+# Centralized Logging
 logger = setup_logger("FluxManager")
 
 # Flux CRD Constants

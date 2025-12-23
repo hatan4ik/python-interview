@@ -3,33 +3,22 @@ import subprocess
 import time
 import sys
 import os
-import logging
+from pathlib import Path
 
-# Allow importing from local utils package
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add src to path so we can import devops_toolkit without installing it
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'))
+sys.path.append(SRC_PATH)
 
 try:
-    from utils.logging_config import setup_logger
-except ImportError:
-    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    from devops_toolkit.utils.logging import setup_logger
+    from devops_toolkit.system import run_command, check_binary_exists
+    from devops_toolkit.k8s.operations import wait_for_deployment
+except ImportError as e:
+    print(f"Error: Could not import devops_toolkit. {e}")
     sys.exit(1)
 
 # Configure Logging
 logger = setup_logger("FluxSetup")
-
-def run_cmd(cmd: str, shell=False):
-    """Runs a shell command and checks for errors."""
-    try:
-        if not shell:
-            cmd = cmd.split()
-        # Suppress output unless error, similar to previous scripts
-        return subprocess.run(cmd, check=True, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Command failed: {cmd}")
-        # Try to decode, handle cases where stderr might be empty
-        err_msg = e.stderr.decode().strip() if e.stderr else "Unknown error"
-        logger.error(f"Error: {err_msg}")
-        raise
 
 def install_flux():
     logger.info("🚀 Starting Flux CD Installation...")
@@ -38,7 +27,7 @@ def install_flux():
     # This installs the Source Controller, Kustomize Controller, Helm Controller, etc.
     logger.info("Applying Flux CD Manifests (Latest)...")
     flux_install_url = "https://github.com/fluxcd/flux2/releases/latest/download/install.yaml"
-    run_cmd(f"kubectl apply -f {flux_install_url}", shell=True)
+    run_command(f"kubectl apply -f {flux_install_url}", shell=True)
 
     # 2. Wait for Components
     logger.info("⏳ Waiting for Flux Controllers to be Ready (this may take 2-3 mins)...")
@@ -51,8 +40,7 @@ def install_flux():
     ]
 
     for comp in components:
-        logger.info(f"   Waiting for {comp}...")
-        run_cmd(f"kubectl wait --for=condition=available deployment/{comp} -n flux-system --timeout=300s", shell=True)
+        wait_for_deployment(comp, "flux-system")
     
     logger.info("✅ Flux CD Core Services are Ready.")
 
@@ -98,8 +86,8 @@ spec:
     source_path.write_text(git_repo_manifest)
     kustomization_path.write_text(kustomization_manifest)
     try:
-        run_cmd(f"kubectl apply -f {source_path}")
-        run_cmd(f"kubectl apply -f {kustomization_path}")
+        run_command(f"kubectl apply -f {source_path}", shell=True)
+        run_command(f"kubectl apply -f {kustomization_path}", shell=True)
     finally:
         source_path.unlink(missing_ok=True)
         kustomization_path.unlink(missing_ok=True)
@@ -107,13 +95,9 @@ spec:
     logger.info("✅ Flux Resources created. Monitoring 'default' namespace for Podinfo...")
 
 def main() -> int:
-    configure_logging()
     print("--- GitOps (Flux CD) Installer for Minikube ---")
     
-    # Check if kubectl exists
-    try:
-        subprocess.run(["kubectl", "version", "--client"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except FileNotFoundError:
+    if not check_binary_exists("kubectl"):
         logger.error("kubectl not found. Please install it first.")
         return 1
 

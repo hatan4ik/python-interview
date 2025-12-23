@@ -3,15 +3,16 @@ import sys
 import os
 from typing import Iterator
 
-# Allow importing from local utils package
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add src to path so we can import devops_toolkit without installing it
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'))
+sys.path.append(SRC_PATH)
 
 try:
-    from utils.k8s_client import load_k8s_config, get_core_api
-    from utils.logging_config import setup_logger
+    from devops_toolkit.k8s.client import load_k8s_config, get_core_api
+    from devops_toolkit.utils.logging import setup_logger
     from kubernetes.client.rest import ApiException
-except ImportError:
-    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+except ImportError as e:
+    print(f"Error: Could not import devops_toolkit. {e}")
     sys.exit(1)
 
 # Centralized Logging
