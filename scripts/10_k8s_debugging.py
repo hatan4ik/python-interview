@@ -1,85 +1,34 @@
 #!/usr/bin/env python
 import sys
+import os
 import logging
-from typing import List, Dict, Optional
+from typing import List
 
-"""
--------------------------------------------------------------------------------
-KUBERNETES TEST ENVIRONMENT SETUP (Minikube)
--------------------------------------------------------------------------------
-To run this script locally on macOS/Linux/Windows, you need a local Kubernetes cluster.
-We recommend 'minikube'.
+# Allow importing from local utils package
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-1. Install Prerequisites (macOS):
-   $ brew install minikube kubernetes-cli
-
-2. Start the Cluster:
-   $ minikube start
-
-   # If you encounter driver/version errors (common with old installs):
-   $ minikube delete
-   $ minikube start
-
-3. Install Python Dependencies:
-   $ pip3 install kubernetes
-
-4. Run the Script:
-   $ python3 10_k8s_debugging.py
-
-5. (Optional) Verify connectivity manually:
-   $ kubectl get nodes
--------------------------------------------------------------------------------
-"""
-
-# Standard interview practice: Mention dependencies
-# Requires: pip install kubernetes
 try:
-    from kubernetes import client, config
+    from utils.k8s_client import load_k8s_config, get_core_api
     from kubernetes.client.rest import ApiException
-    KUBERNETES_AVAILABLE = True
 except ImportError:
-    KUBERNETES_AVAILABLE = False
+    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    sys.exit(1)
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
-
-def configure_logging() -> None:
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-    )
-
-def load_cluster_config(kubeconfig_path: Optional[str] = None):
-    """
-    Loads authentication for the K8s cluster.
-    Handles both local kubeconfig and in-cluster config (running inside a pod).
-    """
-    if not KUBERNETES_AVAILABLE:
-        logger.error("The 'kubernetes' library is not installed. Run: pip install kubernetes")
-        return False
-
-    try:
-        if kubeconfig_path:
-            config.load_kube_config(config_file=kubeconfig_path)
-            logger.info(f"Loaded kubeconfig from {kubeconfig_path}")
-        else:
-            # Tries to load in-cluster config first, then default local (~/.kube/config)
-            try:
-                config.load_incluster_config()
-                logger.info("Loaded in-cluster configuration.")
-            except config.ConfigException:
-                config.load_kube_config()
-                logger.info("Loaded default local kubeconfig.")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to load cluster config: {e}")
-        return False
 
 def get_unhealthy_nodes() -> List[str]:
     """
     Finds nodes that are NOT in the 'Ready' state.
     Critical for on-prem where hardware failures are common.
     """
-    v1 = client.CoreV1Api()
+    v1 = get_core_api()
+    if not v1: return []
+
     unhealthy_nodes = []
     
     try:
@@ -111,8 +60,9 @@ def check_pod_restarts(namespace: str = "default", restart_threshold: int = 5):
     Identifies unstable pods that are restarting frequently.
     Common symptom of application crashes or OOM (Out of Memory) kills.
     """
-    v1 = client.CoreV1Api()
-    
+    v1 = get_core_api()
+    if not v1: return
+
     try:
         pods = v1.list_namespaced_pod(namespace)
         for pod in pods.items:
@@ -138,7 +88,9 @@ def check_pending_pvc():
     Checks for PersistentVolumeClaims that are stuck in Pending.
     Very common in on-prem storage (Ceph/NFS/Local) issues.
     """
-    v1 = client.CoreV1Api()
+    v1 = get_core_api()
+    if not v1: return
+
     try:
         pvcs = v1.list_persistent_volume_claim_for_all_namespaces()
         for pvc in pvcs.items:
@@ -148,11 +100,10 @@ def check_pending_pvc():
         logger.error(f"API Error listing PVCs: {e}")
 
 if __name__ == "__main__":
-    configure_logging()
     print("--- Starting On-Prem AKS/K8s Health Check ---")
     
     # 1. Setup Connection
-    if load_cluster_config():
+    if load_k8s_config():
         
         # 2. Infrastructure Layer Check (Nodes)
         print("\n[Checking Nodes...]")

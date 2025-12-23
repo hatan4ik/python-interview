@@ -1,35 +1,25 @@
 #!/usr/bin/env python
+import sys
+import os
 import logging
-from typing import List, Dict, Optional
+from typing import List
+
+# Allow importing from local utils package
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from kubernetes import client, config
+    from utils.k8s_client import load_k8s_config, get_core_api
+    from kubernetes import client
     from kubernetes.client.rest import ApiException
     KUBERNETES_AVAILABLE = True
 except ImportError:
-    KUBERNETES_AVAILABLE = False
-    client = None
-    config = None
-    ApiException = None
+    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    sys.exit(1)
 
 logger = logging.getLogger("K8sAdvisor")
 
 def configure_logging() -> None:
     logging.basicConfig(level=logging.INFO, format='%(message)s')
-
-def load_k8s_config() -> bool:
-    if not KUBERNETES_AVAILABLE:
-        logger.error("The 'kubernetes' library is missing. Install via: pip install kubernetes")
-        return False
-    try:
-        config.load_kube_config()
-        return True
-    except Exception:
-        try:
-            config.load_incluster_config()
-            return True
-        except Exception:
-            return False
 
 def print_solution(title: str, description: str, commands: List[str]):
     """Pretty prints a resolution block."""
@@ -42,7 +32,9 @@ def print_solution(title: str, description: str, commands: List[str]):
 
 def analyze_pods(namespace="default"):
     """Analyzes pods for common failure states and suggests fixes."""
-    v1 = client.CoreV1Api()
+    v1 = get_core_api()
+    if not v1: return
+
     try:
         pods = v1.list_namespaced_pod(namespace)
         for pod in pods.items:
@@ -100,7 +92,9 @@ def analyze_pods(namespace="default"):
 
 def analyze_pvcs(namespace="default"):
     """Checks for Stuck PVCs."""
-    v1 = client.CoreV1Api()
+    v1 = get_core_api()
+    if not v1: return
+
     try:
         pvcs = v1.list_namespaced_persistent_volume_claim(namespace)
         for pvc in pvcs.items:
@@ -120,7 +114,9 @@ def analyze_pvcs(namespace="default"):
 
 def analyze_services(namespace="default"):
     """Checks for Services that don't point to any Pods."""
-    v1 = client.CoreV1Api()
+    v1 = get_core_api()
+    if not v1: return
+
     try:
         services = v1.list_namespaced_service(namespace)
         pods = v1.list_namespaced_pod(namespace)

@@ -1,36 +1,27 @@
 #!/usr/bin/env python
+import sys
+import os
 import time
 import argparse
 import logging
 from typing import Optional
 
+# Allow importing from local utils package
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 try:
-    from kubernetes import client, config
+    from utils.k8s_client import load_k8s_config, get_core_api
+    from kubernetes import client
     from kubernetes.client.rest import ApiException
     KUBERNETES_AVAILABLE = True
 except ImportError:
-    KUBERNETES_AVAILABLE = False
-    client = None
-    config = None
-    ApiException = None
+    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    sys.exit(1)
 
 logger = logging.getLogger("ChaosGen")
 
 def configure_logging() -> None:
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-def load_k8s_config() -> bool:
-    if not KUBERNETES_AVAILABLE:
-        logger.error("The 'kubernetes' library is missing. Install via: pip install kubernetes")
-        return False
-
-    try:
-        config.load_kube_config()
-        logger.info("Loaded local kubeconfig.")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to load kubeconfig: {e}")
-        return False
 
 def inject_crashloop(namespace="default"):
     """Creates a Pod that exits immediately, causing a CrashLoopBackOff."""
@@ -101,7 +92,8 @@ def inject_stuck_pvc(namespace="default"):
         }
     }
     try:
-        v1 = client.CoreV1Api()
+        v1 = get_core_api()
+        if not v1: return
         v1.create_namespaced_persistent_volume_claim(namespace, manifest)
         logger.info(f"✅ Created Stuck PVC: {name} (Will remain Pending)")
     except ApiException as e:
@@ -123,7 +115,8 @@ def inject_broken_service(namespace="default"):
         }
     }
     try:
-        v1 = client.CoreV1Api()
+        v1 = get_core_api()
+        if not v1: return
         v1.create_namespaced_service(namespace, manifest)
         logger.info(f"✅ Created Broken Service: {name} (Has no Endpoints)")
     except ApiException as e:
@@ -133,7 +126,8 @@ def inject_broken_service(namespace="default"):
             logger.warning(f"Failed to create Service: {e.reason}")
 
 def _apply_manifest(namespace, manifest, description):
-    v1 = client.CoreV1Api()
+    v1 = get_core_api()
+    if not v1: return
     try:
         v1.create_namespaced_pod(namespace, manifest)
         logger.info(f"✅ Created {description}: {manifest['metadata']['name']}")
@@ -146,7 +140,8 @@ def _apply_manifest(namespace, manifest, description):
 def cleanup_chaos(namespace="default"):
     """Deletes all resources labeled 'app=chaos'."""
     logger.info("🧹 Cleaning up Chaos resources...")
-    v1 = client.CoreV1Api()
+    v1 = get_core_api()
+    if not v1: return
     
     # Delete Pods
     pods = v1.list_namespaced_pod(namespace, label_selector="app=chaos")
