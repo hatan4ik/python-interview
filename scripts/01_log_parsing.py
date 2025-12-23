@@ -29,7 +29,14 @@ LOG_CONTENT = """
 """
 
 FILENAME = Path("server.log")
-FILENAME.write_text(LOG_CONTENT.strip(), encoding="utf-8")
+
+def ensure_sample_log(log_file: Path) -> None:
+    """
+    Creates a sample log file if it does not already exist.
+    """
+    if log_file.exists():
+        return
+    log_file.write_text(LOG_CONTENT.strip(), encoding="utf-8")
 
 
 def parse_logs(log_file: Path) -> None:
@@ -88,4 +95,5 @@ def parse_logs(log_file: Path) -> None:
         print(f"  {ip}: {count} requests")
 
 if __name__ == "__main__":
+    ensure_sample_log(FILENAME)
     parse_logs(FILENAME)

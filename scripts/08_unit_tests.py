@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import unittest
-from typing import List
+from pathlib import Path
 
 # Import the logic we want to test.
 # Note: In a real project, you'd likely structure imports differently,
@@ -10,7 +10,9 @@ from importlib.machinery import SourceFileLoader
 
 # Dynamic import trick because filenames start with numbers (05_...)
 # which Python doesn't allow in standard 'import' statements.
-algo_module = SourceFileLoader("algo", "05_algorithm_warmup.py").load_module()
+SCRIPT_DIR = Path(__file__).resolve().parent
+ALGO_PATH = SCRIPT_DIR / "05_algorithm_warmup.py"
+algo_module = SourceFileLoader("algo", str(ALGO_PATH)).load_module()
 
 # ==========================================
 # SCENARIO: Quality Assurance

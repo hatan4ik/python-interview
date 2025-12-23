@@ -1,20 +1,26 @@
 #!/usr/bin/env python
-import sys
 import logging
 from typing import List, Dict, Optional
 
 try:
     from kubernetes import client, config
     from kubernetes.client.rest import ApiException
+    KUBERNETES_AVAILABLE = True
 except ImportError:
-    print("Error: 'kubernetes' library missing. Install via: pip install kubernetes")
-    exit(1)
+    KUBERNETES_AVAILABLE = False
+    client = None
+    config = None
+    ApiException = None
 
-# Configure Logging
-logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger("K8sAdvisor")
 
-def load_k8s_config():
+def configure_logging() -> None:
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+
+def load_k8s_config() -> bool:
+    if not KUBERNETES_AVAILABLE:
+        logger.error("The 'kubernetes' library is missing. Install via: pip install kubernetes")
+        return False
     try:
         config.load_kube_config()
         return True
@@ -143,10 +149,11 @@ def analyze_services(namespace="default"):
     except ApiException as e:
         logger.error(f"Error scanning Services: {e}")
 
-if __name__ == "__main__":
+def main() -> int:
+    configure_logging()
     if not load_k8s_config():
         print("❌ Failed to load kubeconfig.")
-        exit(1)
+        return 1
 
     print("🤖 \033[1mK8s Resolution Advisor: Scanning Cluster...\033[0m")
     print("-" * 60)
@@ -156,3 +163,7 @@ if __name__ == "__main__":
     analyze_services()
     
     print("\n✅ Scan Complete.")
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())

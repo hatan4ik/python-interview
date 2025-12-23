@@ -7,21 +7,30 @@ from typing import Optional
 try:
     from kubernetes import client, config
     from kubernetes.client.rest import ApiException
+    KUBERNETES_AVAILABLE = True
 except ImportError:
-    print("Error: 'kubernetes' library missing. Install via: pip install kubernetes")
-    exit(1)
+    KUBERNETES_AVAILABLE = False
+    client = None
+    config = None
+    ApiException = None
 
-# Configure Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("ChaosGen")
 
-def load_k8s_config():
+def configure_logging() -> None:
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def load_k8s_config() -> bool:
+    if not KUBERNETES_AVAILABLE:
+        logger.error("The 'kubernetes' library is missing. Install via: pip install kubernetes")
+        return False
+
     try:
         config.load_kube_config()
         logger.info("Loaded local kubeconfig.")
+        return True
     except Exception as e:
         logger.error(f"Failed to load kubeconfig: {e}")
-        exit(1)
+        return False
 
 def inject_crashloop(namespace="default"):
     """Creates a Pod that exits immediately, causing a CrashLoopBackOff."""
@@ -96,7 +105,10 @@ def inject_stuck_pvc(namespace="default"):
         v1.create_namespaced_persistent_volume_claim(namespace, manifest)
         logger.info(f"✅ Created Stuck PVC: {name} (Will remain Pending)")
     except ApiException as e:
-        logger.warning(f"Failed to create PVC: {e.reason}")
+        if e.status == 409:
+            logger.info(f"⚠️  Stuck PVC '{name}' already exists. Skipping.")
+        else:
+            logger.warning(f"Failed to create PVC: {e.reason}")
 
 def inject_broken_service(namespace="default"):
     """Creates a Service that points to NO pods (Endpoint failure)."""
@@ -115,7 +127,10 @@ def inject_broken_service(namespace="default"):
         v1.create_namespaced_service(namespace, manifest)
         logger.info(f"✅ Created Broken Service: {name} (Has no Endpoints)")
     except ApiException as e:
-        logger.warning(f"Failed to create Service: {e.reason}")
+        if e.status == 409:
+            logger.info(f"⚠️  Broken Service '{name}' already exists. Skipping.")
+        else:
+            logger.warning(f"Failed to create Service: {e.reason}")
 
 def _apply_manifest(namespace, manifest, description):
     v1 = client.CoreV1Api()
@@ -151,21 +166,32 @@ def cleanup_chaos(namespace="default"):
         v1.delete_namespaced_service(svc.metadata.name, namespace)
         logger.info(f"   Deleted Service: {svc.metadata.name}")
 
-if __name__ == "__main__":
+def main() -> int:
+    configure_logging()
     parser = argparse.ArgumentParser(description="K8s Chaos Generator for Interview Prep")
     parser.add_argument("--mode", choices=["all", "crash", "oom", "pvc", "image", "service", "clean"], default="all", help="Type of chaos to inject")
     args = parser.parse_args()
 
-    load_k8s_config()
+    if not load_k8s_config():
+        return 1
 
     if args.mode == "clean":
         cleanup_chaos()
     else:
         print("🔥 Injecting Chaos into Cluster... (Ctrl+C to stop, run --mode clean to fix)")
-        if args.mode in ["all", "crash"]: inject_crashloop()
-        if args.mode in ["all", "oom"]: inject_oom_killed()
-        if args.mode in ["all", "image"]: inject_image_pull_error()
-        if args.mode in ["all", "pvc"]: inject_stuck_pvc()
-        if args.mode in ["all", "service"]: inject_broken_service()
+        if args.mode in ["all", "crash"]:
+            inject_crashloop()
+        if args.mode in ["all", "oom"]:
+            inject_oom_killed()
+        if args.mode in ["all", "image"]:
+            inject_image_pull_error()
+        if args.mode in ["all", "pvc"]:
+            inject_stuck_pvc()
+        if args.mode in ["all", "service"]:
+            inject_broken_service()
         
         print("\n⚠️  Chaos Injected! Run 'kubectl get all' or use your debug script to find the issues.")
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())

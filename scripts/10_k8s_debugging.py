@@ -40,12 +40,13 @@ try:
 except ImportError:
     KUBERNETES_AVAILABLE = False
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
+
+def configure_logging() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
 
 def load_cluster_config(kubeconfig_path: Optional[str] = None):
     """
@@ -147,6 +148,7 @@ def check_pending_pvc():
         logger.error(f"API Error listing PVCs: {e}")
 
 if __name__ == "__main__":
+    configure_logging()
     print("--- Starting On-Prem AKS/K8s Health Check ---")
     
     # 1. Setup Connection

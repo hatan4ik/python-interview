@@ -1,39 +1,29 @@
 #!/usr/bin/env python
 import subprocess
-import time
-import sys
 import logging
+from pathlib import Path
 
-# Configure Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("FluxSetup")
 
-def run_cmd(cmd: str, shell=False):
+def configure_logging() -> None:
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def run_cmd(cmd: str, shell: bool = False) -> subprocess.CompletedProcess:
     """Runs a shell command and checks for errors."""
     try:
         if not shell:
             cmd = cmd.split()
         # Suppress output unless error, similar to previous scripts
-        subprocess.run(cmd, check=True, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return subprocess.run(cmd, check=True, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
         logger.error(f"Command failed: {cmd}")
         # Try to decode, handle cases where stderr might be empty
         err_msg = e.stderr.decode().strip() if e.stderr else "Unknown error"
         logger.error(f"Error: {err_msg}")
-        # We don't always exit, as sometimes we try-catch specific cmds (like create ns)
-        if "AlreadyExists" not in err_msg:
-             sys.exit(1)
+        raise
 
 def install_flux():
     logger.info("🚀 Starting Flux CD Installation...")
-
-    # 0. Pre-flight Check
-    try:
-        subprocess.run("kubectl get namespace flux-system", shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        logger.info("✅ Flux CD namespace found. Skipping installation steps.")
-        return
-    except subprocess.CalledProcessError:
-        logger.info("Flux CD not found. Proceeding with installation.")
 
     # 1. Install Flux Manifests (The "Non-Bootstrap" way for Demos)
     # This installs the Source Controller, Kustomize Controller, Helm Controller, etc.
@@ -94,22 +84,21 @@ spec:
   targetNamespace: default
 """
 
-    # Apply GitRepo
-    with open("flux_source.yaml", "w") as f:
-        f.write(git_repo_manifest)
-    run_cmd("kubectl apply -f flux_source.yaml")
-    
-    # Apply Kustomization
-    with open("flux_kustomization.yaml", "w") as f:
-        f.write(kustomization_manifest)
-    run_cmd("kubectl apply -f flux_kustomization.yaml")
-
-    # Cleanup
-    run_cmd("rm flux_source.yaml flux_kustomization.yaml", shell=True)
+    source_path = Path("flux_source.yaml")
+    kustomization_path = Path("flux_kustomization.yaml")
+    source_path.write_text(git_repo_manifest)
+    kustomization_path.write_text(kustomization_manifest)
+    try:
+        run_cmd(f"kubectl apply -f {source_path}")
+        run_cmd(f"kubectl apply -f {kustomization_path}")
+    finally:
+        source_path.unlink(missing_ok=True)
+        kustomization_path.unlink(missing_ok=True)
     
     logger.info("✅ Flux Resources created. Monitoring 'default' namespace for Podinfo...")
 
-if __name__ == "__main__":
+def main() -> int:
+    configure_logging()
     print("--- GitOps (Flux CD) Installer for Minikube ---")
     
     # Check if kubectl exists
@@ -117,10 +106,13 @@ if __name__ == "__main__":
         subprocess.run(["kubectl", "version", "--client"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except FileNotFoundError:
         logger.error("kubectl not found. Please install it first.")
-        exit(1)
+        return 1
 
-    install_flux()
-    deploy_flux_app()
+    try:
+        install_flux()
+        deploy_flux_app()
+    except subprocess.CalledProcessError:
+        return 1
     
     print("\n🎉 \033[1mINSTALLATION COMPLETE!\033[0m")
     print("-" * 60)
@@ -132,3 +124,7 @@ if __name__ == "__main__":
     print("\n   2. Check the App (Podinfo):")
     print("      $ kubectl get pods -n default -l app=podinfo")
     print("-" * 60)
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())

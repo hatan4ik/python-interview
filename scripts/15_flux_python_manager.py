@@ -13,7 +13,6 @@ This script demonstrates:
 3. Suspending a Kustomization programmatically.
 """
 
-import sys
 import logging
 import datetime
 from typing import Dict, Any
@@ -21,12 +20,13 @@ from typing import Dict, Any
 try:
     from kubernetes import client, config
     from kubernetes.client.rest import ApiException
+    KUBERNETES_AVAILABLE = True
 except ImportError:
-    print("Error: 'kubernetes' library missing. Install via: pip install kubernetes")
-    exit(1)
+    KUBERNETES_AVAILABLE = False
+    client = None
+    config = None
+    ApiException = None
 
-# Configure Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("FluxManager")
 
 # Flux CRD Constants
@@ -37,8 +37,14 @@ PLURAL_GIT = "gitrepositories"
 GROUP_KUST = "kustomize.toolkit.fluxcd.io"
 PLURAL_KUST = "kustomizations"
 
-def load_k8s_config():
+def configure_logging() -> None:
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def load_k8s_config() -> bool:
     """Authenticates with the cluster."""
+    if not KUBERNETES_AVAILABLE:
+        logger.error("The 'kubernetes' library is missing. Install via: pip install kubernetes")
+        return False
     try:
         config.load_kube_config() # Local ~/.kube/config
         return True
@@ -156,10 +162,11 @@ def suspend_kustomization(name: str, namespace: str, suspend: bool = True):
     except ApiException as e:
         logger.error(f"Failed to update suspend state: {e}")
 
-if __name__ == "__main__":
+def main() -> int:
+    configure_logging()
     if not load_k8s_config():
         logger.error("Could not load Kubeconfig.")
-        exit(1)
+        return 1
 
     print("\n--- 1. Listing Sources ---")
     try:
@@ -174,3 +181,7 @@ if __name__ == "__main__":
     
     # print("\n--- 3. Emergency Suspend ---")
     # suspend_kustomization("podinfo", "flux-system", suspend=True)
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
