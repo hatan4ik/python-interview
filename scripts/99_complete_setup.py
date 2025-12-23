@@ -14,13 +14,22 @@ and it will only do the work that is missing.
 
 import subprocess
 import sys
+import os
 import shutil
 import time
 import logging
 
+# Allow importing from local utils package
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from utils.logging_config import setup_logger
+except ImportError:
+    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    sys.exit(1)
+
 # Configure Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("Bootstrap")
+logger = setup_logger("Bootstrap")
 
 def check_command(cmd: str):
     """Verifies that a required binary is installed."""

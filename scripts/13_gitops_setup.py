@@ -1,16 +1,23 @@
 #!/usr/bin/env python
-import base64
 import subprocess
 import time
+import sys
+import os
 import logging
-from pathlib import Path
 
-logger = logging.getLogger("GitOpsSetup")
+# Allow importing from local utils package
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-def configure_logging() -> None:
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+try:
+    from utils.logging_config import setup_logger
+except ImportError:
+    print("Error: Could not import utils. Ensure you are running from the correct directory.")
+    sys.exit(1)
 
-def run_cmd(cmd: str, shell: bool = False) -> subprocess.CompletedProcess:
+# Configure Logging
+logger = setup_logger("GitOpsSetup")
+
+def run_cmd(cmd: str, shell=False):
     """Runs a shell command and checks for errors."""
     try:
         # Split command for safety unless shell=True

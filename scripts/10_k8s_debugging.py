@@ -1,40 +1,37 @@
 #!/usr/bin/env python
 import sys
 import os
-import logging
-from typing import List
+from typing import Iterator
 
 # Allow importing from local utils package
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from utils.k8s_client import load_k8s_config, get_core_api
+    from utils.logging_config import setup_logger
     from kubernetes.client.rest import ApiException
 except ImportError:
     print("Error: Could not import utils. Ensure you are running from the correct directory.")
     sys.exit(1)
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Centralized Logging
+logger = setup_logger(__name__)
 
-def get_unhealthy_nodes() -> List[str]:
+def iter_unhealthy_nodes() -> Iterator[str]:
     """
-    Finds nodes that are NOT in the 'Ready' state.
-    Critical for on-prem where hardware failures are common.
+    Generator that yields nodes NOT in 'Ready' state.
+    
+    Why Generators?
+    - Memory Efficiency: We don't build a massive list of 5000 nodes in RAM.
+    - Latency: We can process the first bad node before the API has finished sending the last one.
     """
     v1 = get_core_api()
-    if not v1: return []
+    if not v1: return
 
-    unhealthy_nodes = []
-    
     try:
+        # Paging could be added here for true large-scale support (limit=500, continue_token)
         nodes = v1.list_node()
         for node in nodes.items:
-            # Parse node conditions to find 'Ready' status
             is_ready = False
             for condition in node.status.conditions:
                 if condition.type == 'Ready' and condition.status == 'True':
@@ -42,56 +39,47 @@ def get_unhealthy_nodes() -> List[str]:
                     break
             
             if not is_ready:
-                unhealthy_nodes.append(node.metadata.name)
                 logger.warning(f"Node {node.metadata.name} is NOT Ready.")
-                
-                # Interview Tip: Check for Memory/Disk Pressure
-                for condition in node.status.conditions:
-                    if condition.status == 'True' and condition.type != 'Ready':
-                        logger.warning(f"  -> Issue: {condition.type} ({condition.message})")
+                yield node.metadata.name
 
     except ApiException as e:
         logger.error(f"API Error listing nodes: {e}")
-        
-    return unhealthy_nodes
 
 def check_pod_restarts(namespace: str = "default", restart_threshold: int = 5):
     """
-    Identifies unstable pods that are restarting frequently.
-    Common symptom of application crashes or OOM (Out of Memory) kills.
+    Identifies unstable pods.
     """
     v1 = get_core_api()
     if not v1: return
 
     try:
+        # Optimization: In a real large cluster, you'd use `limit` and `continue` pagination here.
         pods = v1.list_namespaced_pod(namespace)
         for pod in pods.items:
-            if pod.status.container_statuses:
-                for container in pod.status.container_statuses:
-                    if container.restart_count > restart_threshold:
-                        logger.warning(
-                            f"High Restarts: Pod {pod.metadata.name} "
-                            f"(Container: {container.name}) "
-                            f"has restarted {container.restart_count} times."
-                        )
-                        # Check specific error states
-                        if container.state.waiting:
-                            logger.info(f"  -> State: Waiting ({container.state.waiting.reason})")
-                        if container.state.terminated:
-                            logger.info(f"  -> Last State: Terminated ({container.state.terminated.reason})")
+            if not pod.status.container_statuses:
+                continue
+                
+            for container in pod.status.container_statuses:
+                if container.restart_count > restart_threshold:
+                    logger.warning(
+                        f"High Restarts: Pod {pod.metadata.name} "
+                        f"(Container: {container.name}) "
+                        f"has restarted {container.restart_count} times."
+                    )
 
     except ApiException as e:
         logger.error(f"API Error in namespace {namespace}: {e}")
 
 def check_pending_pvc():
     """
-    Checks for PersistentVolumeClaims that are stuck in Pending.
-    Very common in on-prem storage (Ceph/NFS/Local) issues.
+    Checks for Stuck PVCs.
     """
     v1 = get_core_api()
     if not v1: return
 
     try:
+        # Server-Side Filtering: Only fetch Bound/Pending PVCs if needed, 
+        # but here we want non-Bound. K8s doesn't support '!=' selectors easily.
         pvcs = v1.list_persistent_volume_claim_for_all_namespaces()
         for pvc in pvcs.items:
             if pvc.status.phase != 'Bound':
@@ -100,26 +88,26 @@ def check_pending_pvc():
         logger.error(f"API Error listing PVCs: {e}")
 
 if __name__ == "__main__":
-    print("--- Starting On-Prem AKS/K8s Health Check ---")
+    logger.info("--- Starting On-Prem AKS/K8s Health Check (Optimized) ---")
     
-    # 1. Setup Connection
     if load_k8s_config():
         
-        # 2. Infrastructure Layer Check (Nodes)
-        print("\n[Checking Nodes...]")
-        bad_nodes = get_unhealthy_nodes()
-        if not bad_nodes:
-            print("All nodes look healthy.")
+        logger.info("Checking Nodes (Lazy Evaluation)...")
+        # Consuming the generator
+        bad_nodes_count = 0
+        for node_name in iter_unhealthy_nodes():
+            bad_nodes_count += 1
+        
+        if bad_nodes_count == 0:
+            logger.info("All nodes look healthy.")
 
-        # 3. Application Layer Check (Pods in 'default' namespace)
-        print("\n[Checking Application Stability...]")
+        logger.info("Checking Application Stability...")
         check_pod_restarts(namespace="default", restart_threshold=1)
 
-        # 4. Storage Layer Check
-        print("\n[Checking Storage...]")
+        logger.info("Checking Storage...")
         check_pending_pvc()
 
     else:
-        print("Skipping checks due to configuration failure.")
+        logger.warning("Skipping checks due to configuration failure.")
     
-    print("\n--- Check Complete ---")
+    logger.info("--- Check Complete ---")

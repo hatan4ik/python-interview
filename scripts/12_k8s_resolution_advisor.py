@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from utils.k8s_client import load_k8s_config, get_core_api
+    from utils.logging_config import setup_logger
     from kubernetes import client
     from kubernetes.client.rest import ApiException
     KUBERNETES_AVAILABLE = True
@@ -16,10 +17,7 @@ except ImportError:
     print("Error: Could not import utils. Ensure you are running from the correct directory.")
     sys.exit(1)
 
-logger = logging.getLogger("K8sAdvisor")
-
-def configure_logging() -> None:
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = setup_logger("K8sAdvisor")
 
 def print_solution(title: str, description: str, commands: List[str]):
     """Pretty prints a resolution block."""
@@ -146,7 +144,6 @@ def analyze_services(namespace="default"):
         logger.error(f"Error scanning Services: {e}")
 
 def main() -> int:
-    configure_logging()
     if not load_k8s_config():
         print("❌ Failed to load kubeconfig.")
         return 1

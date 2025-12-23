@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from utils.k8s_client import load_k8s_config, get_core_api
+    from utils.logging_config import setup_logger
     from kubernetes import client
     from kubernetes.client.rest import ApiException
     KUBERNETES_AVAILABLE = True
@@ -18,10 +19,7 @@ except ImportError:
     print("Error: Could not import utils. Ensure you are running from the correct directory.")
     sys.exit(1)
 
-logger = logging.getLogger("ChaosGen")
-
-def configure_logging() -> None:
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = setup_logger("ChaosGen")
 
 def inject_crashloop(namespace="default"):
     """Creates a Pod that exits immediately, causing a CrashLoopBackOff."""
@@ -162,7 +160,6 @@ def cleanup_chaos(namespace="default"):
         logger.info(f"   Deleted Service: {svc.metadata.name}")
 
 def main() -> int:
-    configure_logging()
     parser = argparse.ArgumentParser(description="K8s Chaos Generator for Interview Prep")
     parser.add_argument("--mode", choices=["all", "crash", "oom", "pvc", "image", "service", "clean"], default="all", help="Type of chaos to inject")
     args = parser.parse_args()

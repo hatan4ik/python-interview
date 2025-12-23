@@ -24,14 +24,14 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from utils.k8s_client import load_k8s_config, get_custom_objects_api
+    from utils.logging_config import setup_logger
     from kubernetes.client.rest import ApiException
 except ImportError:
     print("Error: Could not import utils. Ensure you are running from the correct directory.")
     sys.exit(1)
 
 # Configure Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("FluxManager")
+logger = setup_logger("FluxManager")
 
 # Flux CRD Constants
 GROUP = "source.toolkit.fluxcd.io"
