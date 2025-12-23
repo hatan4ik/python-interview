@@ -39,6 +39,13 @@ We moved from a flat structure to a `src` layout:
 *   **Packaging:** With `pyproject.toml`, the toolkit is a first-class citizen. It can be installed (`pip install -e .`) or distributed.
 *   **Path Management:** Scripts in `scripts/` utilize `sys.path` injection (or proper installation) to robustly find their dependencies, ensuring they work out-of-the-box.
 
+### 3. Verification Strategy (Tests)
+
+Modularity allows for testability. We added a `tests/` directory to verify our core logic without needing a running cluster.
+
+*   **Unit Tests:** `tests/test_system.py` mocks `subprocess.run` to ensure our command wrapper handles errors correctly.
+*   **Safety:** We can now modify the core library with confidence, knowing that `python -m unittest discover tests` will catch regressions.
+
 ## How to Use
 
 ### Setup
