@@ -151,6 +151,10 @@ In an interview, you will be asked: *"Why use Python for this instead of a simpl
 
 Don't get caught off guard. Review these files before the call:
 
+*   **[INTERVIEW_MASTER_GUIDE.md](./INTERVIEW_MASTER_GUIDE.md)**: **START HERE:** The "Meta-Guide" consolidating Logic, Pseudocode, and System Design patterns.
+*   **[PSEUDOCODE_METHODOLOGY.md](./PSEUDOCODE_METHODOLOGY.md)**: How to read problems and write "Pro" pseudocode (The 3-Pass Read).
+*   **[INTERVIEW_PSEUDOCODE_GUIDE.md](./INTERVIEW_PSEUDOCODE_GUIDE.md)**: Logic guide for String Manipulation, Sorting, and standard coding rounds.
+*   **[ADVANCED_DEVOPS_ALGO_GUIDE.md](./ADVANCED_DEVOPS_ALGO_GUIDE.md)**: Logic guide for System Design, Dependency Resolution, and Log Analysis.
 *   **[PYTHON_CONCEPTS.md](./PYTHON_CONCEPTS.md)**: Explains `__name__ == "__main__"`, Iterators vs. Generators, and Context Managers (`with open(...)`).
 *   **[KUBERNETES_CONCEPTS.md](./KUBERNETES_CONCEPTS.md)**: **NEW:** Deep dive into Networking, Port Forwarding Myths, and Production Access Patterns.
 *   **[GITOPS_TOOLS.md](./GITOPS_TOOLS.md)**: **NEW:** Comparison of ArgoCD vs. Flux CD and why "Push vs. Pull" matters.
