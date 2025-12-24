@@ -40,10 +40,16 @@ The "Ops" in DevOps.
 
 ## 4. Code Repository (The "Answers")
 Run these. Break these. Modify these.
-*   `scripts/faang_interview_challenges.py` - **(NEW)** *Rate Limiters, Merging Logs, & Tree Serialization.*
+
+### The "Bar Raisers" (Start Here for Senior Roles)
+*   `scripts/faang_interview_challenges.py` - *Rate Limiters, Merging Logs, & Tree Serialization.*
+*   `scripts/faang_concurrency_deep_dive.py` - **(NEW)** *Locks, Semaphores, & Producer-Consumer Queues.*
+*   `scripts/faang_system_design_sims.py` - **(NEW)** *Tries (Autocomplete) & Consistent Hashing (Load Balancing).*
+*   `tests/test_faang_challenges.py` - **(NEW)** *How to write Unit Tests that impress interviewers.*
+
+### The Foundations
 *   `scripts/reconstruct_sentence.py` - *The classic "Index:Word" sorting trap.*
 *   `scripts/advanced_devops_algos.py` - *Credit Cards, Bin Packing, & Graphs.*
-*   `scripts/interview_practice_set.py` - *Core FAANG patterns with sample inputs/outputs.*
 *   `scripts/01_log_parsing.py` - *Basic log manipulation.*
 *   `scripts/10_k8s_debugging.py` - *Mock K8s troubleshooting.*
 
