@@ -1,6 +1,6 @@
 # Python Interview: Pseudocode & Algorithms Guide
 
-This guide covers common "string manipulation and sorting" interview questions, providing **Pseudocode**, **Pythonic Logic**, and **Discussion** for each.
+This guide covers common interview patterns, providing **Pseudocode**, **Pythonic Logic**, and **Discussion** for each.
 
 ---
 
@@ -191,3 +191,245 @@ FUNCTION group_anagrams(word_list):
 *   **Key Concept:** Anagrams contain the exact same characters. If you sort the characters, they become identical strings.
 *   **Hash Map:** Using the sorted string as the Key allows O(1) lookups to find the correct bucket for the word.
 *   **Complexity:** $O(N \cdot K \log K)$, where $N$ is number of words and $K$ is max length of a word (due to sorting each word).
+
+---
+
+## 6. Longest Substring Without Repeating Characters (Sliding Window)
+
+**Problem:**  
+Given a string, return the length of the longest substring with all unique characters.
+
+### Pseudocode
+```text
+FUNCTION longest_unique_substring(s):
+    INITIALIZE 'left' = 0
+    INITIALIZE 'best' = 0
+    INITIALIZE map 'last_seen' = empty
+
+    FOR 'right' FROM 0 TO length(s) - 1:
+        ch = s[right]
+
+        IF ch IN last_seen AND last_seen[ch] >= left:
+            left = last_seen[ch] + 1
+
+        last_seen[ch] = right
+        best = MAX(best, right - left + 1)
+
+    RETURN best
+```
+
+### Discussion & Tips
+*   **The Trap:** When you see a duplicate, you cannot move `left` backward. Use `MAX` logic to keep it monotonic.
+*   **Why it Works:** The window `[left, right]` always contains unique characters.
+*   **Complexity:** O(N) time, O(K) space for the map.
+
+---
+
+## 7. Minimum Window Substring (Advanced Sliding Window)
+
+**Problem:**  
+Given `s` and `t`, return the smallest substring of `s` that contains all characters in `t` (with correct counts). Return empty if none.
+
+### Pseudocode
+```text
+FUNCTION min_window(s, t):
+    IF t IS EMPTY: RETURN ""
+
+    need = frequency map of chars in t
+    missing = length(t)
+    left = 0
+    best_len = INFINITY
+    best_range = (-1, -1)
+
+    FOR right FROM 0 TO length(s) - 1:
+        ch = s[right]
+        IF ch IN need:
+            need[ch] = need[ch] - 1
+            IF need[ch] >= 0:
+                missing = missing - 1
+
+        WHILE missing == 0:
+            IF (right - left + 1) < best_len:
+                best_len = right - left + 1
+                best_range = (left, right)
+
+            left_ch = s[left]
+            IF left_ch IN need:
+                need[left_ch] = need[left_ch] + 1
+                IF need[left_ch] > 0:
+                    missing = missing + 1
+            left = left + 1
+
+    IF best_len == INFINITY: RETURN ""
+    RETURN substring of s from best_range
+```
+
+### Discussion & Tips
+*   **The Trap:** Counting `missing` based on total characters (not unique chars) avoids off-by-one errors.
+*   **Key Insight:** Negative counts mean "extra" characters that can be dropped.
+*   **Complexity:** O(N) time, O(K) space.
+
+---
+
+## 8. Number of Islands (Grid DFS/BFS)
+
+**Problem:**  
+Given a 2D grid of `"1"` (land) and `"0"` (water), count islands (connected land).
+
+### Pseudocode
+```text
+FUNCTION num_islands(grid):
+    IF grid IS EMPTY: RETURN 0
+    rows = number of rows
+    cols = number of cols
+    count = 0
+
+    FOR r FROM 0 TO rows - 1:
+        FOR c FROM 0 TO cols - 1:
+            IF grid[r][c] == "1":
+                count = count + 1
+                FLOOD_FILL(grid, r, c)
+
+    RETURN count
+
+FUNCTION flood_fill(grid, r, c):
+    IF r OR c out of bounds: RETURN
+    IF grid[r][c] != "1": RETURN
+
+    grid[r][c] = "0"
+    FOR EACH (dr, dc) IN [(1,0), (-1,0), (0,1), (0,-1)]:
+        flood_fill(grid, r + dr, c + dc)
+```
+
+### Discussion & Tips
+*   **Mutation:** Marking visited cells in-place avoids extra memory.
+*   **Iterative Alternative:** Use a stack or queue to avoid recursion depth limits.
+*   **Complexity:** O(R * C) time, O(R * C) worst-case space.
+
+---
+
+## 9. LRU Cache (Hash Map + Doubly Linked List)
+
+**Problem:**  
+Design an LRU Cache with `get` and `put` in O(1) time.
+
+### Pseudocode
+```text
+CLASS Node:
+    key, value
+    prev, next
+
+CLASS LRUCache(capacity):
+    map = {}
+    head = Node()  # dummy
+    tail = Node()  # dummy
+    head.next = tail
+    tail.prev = head
+    size = 0
+
+    FUNCTION get(key):
+        IF key NOT IN map: RETURN -1
+        node = map[key]
+        REMOVE(node)
+        ADD_TO_FRONT(node)
+        RETURN node.value
+
+    FUNCTION put(key, value):
+        IF key IN map:
+            node = map[key]
+            node.value = value
+            REMOVE(node)
+            ADD_TO_FRONT(node)
+            RETURN
+
+        IF size == capacity:
+            lru = tail.prev
+            REMOVE(lru)
+            DELETE map[lru.key]
+            size = size - 1
+
+        node = Node(key, value)
+        ADD_TO_FRONT(node)
+        map[key] = node
+        size = size + 1
+
+    FUNCTION REMOVE(node):
+        node.prev.next = node.next
+        node.next.prev = node.prev
+
+    FUNCTION ADD_TO_FRONT(node):
+        node.next = head.next
+        node.prev = head
+        head.next.prev = node
+        head.next = node
+```
+
+### Discussion & Tips
+*   **Why Two Structures:** The map gives O(1) lookup; the list gives O(1) eviction order.
+*   **The Trap:** You must move a node to the front on both `get` and `put`.
+
+---
+
+## 10. Kth Largest Element (Quickselect)
+
+**Problem:**  
+Find the Kth largest number in an unsorted array without sorting the full list.
+
+### Pseudocode
+```text
+FUNCTION kth_largest(nums, k):
+    target = length(nums) - k  # index if array were sorted ascending
+    left = 0
+    right = length(nums) - 1
+
+    WHILE left <= right:
+        pivot_index = PARTITION(nums, left, right)
+
+        IF pivot_index == target: RETURN nums[pivot_index]
+        ELSE IF pivot_index < target:
+            left = pivot_index + 1
+        ELSE:
+            right = pivot_index - 1
+
+FUNCTION PARTITION(nums, left, right):
+    pivot = nums[right]
+    store = left
+
+    FOR i FROM left TO right - 1:
+        IF nums[i] <= pivot:
+            SWAP nums[i], nums[store]
+            store = store + 1
+
+    SWAP nums[store], nums[right]
+    RETURN store
+```
+
+### Discussion & Tips
+*   **Expected Time:** O(N) average, O(N^2) worst-case (mitigated by random pivot).
+*   **The Trap:** Kth largest vs Kth smallest. Convert to index carefully.
+
+---
+
+## 11. Coin Change (Dynamic Programming)
+
+**Problem:**  
+Given coins and an amount, return the fewest coins needed, or `-1` if impossible.
+
+### Pseudocode
+```text
+FUNCTION coin_change(coins, amount):
+    dp = array of size amount + 1 filled with INFINITY
+    dp[0] = 0
+
+    FOR a FROM 1 TO amount:
+        FOR coin IN coins:
+            IF a - coin >= 0:
+                dp[a] = MIN(dp[a], dp[a - coin] + 1)
+
+    IF dp[amount] == INFINITY: RETURN -1
+    RETURN dp[amount]
+```
+
+### Discussion & Tips
+*   **Bottom-Up:** Each sub-amount builds on smaller solutions.
+*   **Complexity:** O(amount * number_of_coins) time, O(amount) space.
