@@ -25,6 +25,15 @@ Most candidates fail because they start coding immediately. **Pros start by read
     *   "Top K" -> Suggests Heap.
     *   "10 GB of data" -> Suggests external sort or processing in chunks (cannot fit in RAM).
 
+### Part 1.5: The "Deception Check"
+**Goal:** Don't get tricked by "easy" questions.
+FAANG interviewers love to give you a problem that looks trivial (e.g., "Sort this list of words").
+*   **The Trap:** " 1 : apple "
+*   **The Reality:** The data is dirty. Integers are strings. Whitespace is everywhere.
+*   **The Protocol:** Always ask: "Is the input sanitized? Can I assume valid integers? What about trailing spaces?"
+    *   *If they say:* "Assume the input is raw user data."
+    *   *You think:* `.strip()`, `try/except`, `regex`.
+
 ### Pass 3: The "Edge Case" Simulation
 **Goal:** Break your own logic before you build it.
 *   *Action:* Write down 3 test cases immediately:
