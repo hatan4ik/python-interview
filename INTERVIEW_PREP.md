@@ -71,3 +71,24 @@ Use the code in this repository to demonstrate these concepts.
 1.  *Design a system to rotate logs on 10k servers.*
 2.  *What happens when you type `google.com` in your browser? (DNS -> TCP -> TLS -> HTTP).*
 3.  *How do you handle secrets in Kubernetes? (SealedSecrets, Vault, ExternalSecrets).*
+
+## 7. Coding Round Drills (FAANG Core Patterns)
+
+1.  *Two Sum* -> Hash Map, O(N). (See `scripts/interview_practice_set.py`)
+2.  *Valid Parentheses* -> Stack.
+3.  *Longest Substring Without Repeating Characters* -> Sliding Window.
+4.  *Minimum Window Substring* -> Sliding Window + Frequency Map.
+5.  *Product of Array Except Self* -> Prefix/Suffix.
+6.  *Merge Intervals* -> Sort + Merge.
+7.  *Binary Search* -> Standard and Rotated Array variants.
+8.  *Subarray Sum Equals K* -> Prefix Sum + Hash Map.
+9.  *Number of Islands* -> DFS/BFS on grid.
+10. *Kth Largest Element* -> Quickselect or Heap.
+
+## 8. Systems Coding Exercises (SRE Flavor)
+
+1.  *Build Order from Dependencies* (Topological Sort).
+2.  *Rate Limiter* (Sliding Window vs Token Bucket).
+3.  *Config Drift Detector* (Deep JSON Diff).
+4.  *Top K URLs from Logs* (Counter + Min-Heap).
+5.  *Merge Maintenance Windows* (Intervals).

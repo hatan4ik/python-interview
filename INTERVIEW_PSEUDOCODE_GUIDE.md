@@ -433,3 +433,170 @@ FUNCTION coin_change(coins, amount):
 ### Discussion & Tips
 *   **Bottom-Up:** Each sub-amount builds on smaller solutions.
 *   **Complexity:** O(amount * number_of_coins) time, O(amount) space.
+
+---
+
+## 12. Two Sum (Hash Map)
+
+**Problem:**  
+Given an array of integers and a target, return the indices of the two numbers that add up to the target.
+
+### Pseudocode
+```text
+FUNCTION two_sum(nums, target):
+    seen = empty map
+
+    FOR i FROM 0 TO length(nums) - 1:
+        need = target - nums[i]
+        IF need IN seen:
+            RETURN [seen[need], i]
+        seen[nums[i]] = i
+
+    RETURN []
+```
+
+### Discussion & Tips
+*   **One-Pass:** The hash map stores what you have seen so far.
+*   **The Trap:** You must insert after the check to avoid using the same element twice.
+
+---
+
+## 13. Valid Parentheses (Stack)
+
+**Problem:**  
+Given a string of brackets, determine if the order is valid.
+
+### Pseudocode
+```text
+FUNCTION is_valid(s):
+    stack = empty list
+    pairs = {")": "(", "]": "[", "}": "{"}
+
+    openers = SET of pairs values
+
+    FOR ch IN s:
+        IF ch IN pairs:
+            IF stack IS EMPTY OR POP(stack) != pairs[ch]:
+                RETURN False
+        ELSE IF ch IN openers:
+            PUSH ch TO stack
+
+    RETURN stack IS EMPTY
+```
+
+### Discussion & Tips
+*   **Core Idea:** Every closing bracket must match the most recent opening bracket.
+*   **The Trap:** If the stack is empty when you see a closing bracket, fail immediately.
+
+---
+
+## 14. Product of Array Except Self (Prefix/Suffix)
+
+**Problem:**  
+Given an array, return a new array where each index has the product of all other elements.
+
+### Pseudocode
+```text
+FUNCTION product_except_self(nums):
+    n = length(nums)
+    output = array of size n filled with 1
+
+    prefix = 1
+    FOR i FROM 0 TO n - 1:
+        output[i] = prefix
+        prefix = prefix * nums[i]
+
+    suffix = 1
+    FOR i FROM n - 1 DOWN TO 0:
+        output[i] = output[i] * suffix
+        suffix = suffix * nums[i]
+
+    RETURN output
+```
+
+### Discussion & Tips
+*   **No Division:** Handles zeros safely.
+*   **Space:** O(1) extra space if you do not count the output array.
+
+---
+
+## 15. Merge Intervals (Sort + Merge)
+
+**Problem:**  
+Given intervals, merge any that overlap and return the consolidated list.
+
+### Pseudocode
+```text
+FUNCTION merge_intervals(intervals):
+    IF intervals IS EMPTY: RETURN []
+    SORT intervals BY start
+
+    merged = [intervals[0]]
+
+    FOR current IN intervals[1:]:
+        last = merged[-1]
+        IF current.start <= last.end:
+            last.end = MAX(last.end, current.end)
+        ELSE:
+            APPEND current TO merged
+
+    RETURN merged
+```
+
+### Discussion & Tips
+*   **Sorting is Mandatory:** Overlap checks only work after sorting by start.
+*   **Pattern Link:** Same logic as merging maintenance windows.
+
+---
+
+## 16. Binary Search (Classic)
+
+**Problem:**  
+Given a sorted array, return the index of the target or `-1` if not found.
+
+### Pseudocode
+```text
+FUNCTION binary_search(nums, target):
+    left = 0
+    right = length(nums) - 1
+
+    WHILE left <= right:
+        mid = left + ((right - left) // 2)
+        IF nums[mid] == target: RETURN mid
+        IF nums[mid] < target:
+            left = mid + 1
+        ELSE:
+            right = mid - 1
+
+    RETURN -1
+```
+
+### Discussion & Tips
+*   **Overflow Safe:** `left + (right - left) // 2` avoids integer overflow in other languages.
+*   **The Trap:** Use `<=` in the loop or you will skip the last element.
+
+---
+
+## 17. Subarray Sum Equals K (Prefix Sum + Hash Map)
+
+**Problem:**  
+Given an array and integer `k`, count the number of subarrays that sum to `k`.
+
+### Pseudocode
+```text
+FUNCTION subarray_sum(nums, k):
+    count = 0
+    prefix = 0
+    freq = map with {0: 1}
+
+    FOR num IN nums:
+        prefix = prefix + num
+        count = count + freq.get(prefix - k, 0)
+        freq[prefix] = freq.get(prefix, 0) + 1
+
+    RETURN count
+```
+
+### Discussion & Tips
+*   **Key Insight:** If `prefix[j] - prefix[i] = k`, then subarray `(i+1..j)` sums to `k`.
+*   **The Trap:** Initialize `{0: 1}` to count subarrays that start at index 0.

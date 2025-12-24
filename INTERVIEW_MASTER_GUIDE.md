@@ -24,6 +24,8 @@ Don't just solve problems. Recognize patterns.
 *   [**Advanced / "Dirty" Algorithms**](./ADVANCED_DEVOPS_ALGO_GUIDE.md)  
     *   *Real-world scenarios designed to make you fail.*
     *   *Includes: Credit Card Sorting (Multi-Key), Server Bin Packing (Knapsack), Dependency Graphs.*
+*   [**Practice Set (Quick Drills)**](./scripts/interview_practice_set.py)  
+    *   *Hands-on exercises: Two Sum, Valid Parentheses, Merge Intervals, Subarray Sum.*
 
 ---
 
@@ -36,16 +38,25 @@ The "Ops" in DevOps.
 
 ---
 
-## 💻 4. Code Repository (The "Answers")
+## 4. Code Repository (The "Answers")
 Run these. Break these. Modify these.
+*   `scripts/faang_interview_challenges.py` - **(NEW)** *Rate Limiters, Merging Logs, & Tree Serialization.*
 *   `scripts/reconstruct_sentence.py` - *The classic "Index:Word" sorting trap.*
 *   `scripts/advanced_devops_algos.py` - *Credit Cards, Bin Packing, & Graphs.*
+*   `scripts/interview_practice_set.py` - *Core FAANG patterns with sample inputs/outputs.*
 *   `scripts/01_log_parsing.py` - *Basic log manipulation.*
 *   `scripts/10_k8s_debugging.py` - *Mock K8s troubleshooting.*
 
 ---
 
-## 🛠 5. The "Aaron Maxwell" Advice Column
+## 🧐 5. The Audit (Self-Correction)
+*   [**FAANG Codebase Audit**](./FAANG_REVIEW.md)  
+    *   *A critique of this very repo from a Staff Engineer's perspective.*
+    *   *Read this to learn how to critique your OWN code in an interview.*
+
+---
+
+## 🛠 6. The "Aaron Maxwell" Advice Column
 **Q: "I struggle with reading the problem."**  
 **A:** Use the [Pseudocode Methodology](./PSEUDOCODE_METHODOLOGY.md). Read it three times. Identify the constraints.
 

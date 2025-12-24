@@ -102,6 +102,195 @@ def problem_3_longest_substring_without_repeating(s):
     return max_length
 
 
+def problem_4_two_sum(nums, target):
+    """
+    Problem: Two Sum
+
+    Input: nums = [2, 7, 11, 15], target = 9
+    Output: [0, 1]
+
+    Interview Tip:
+    - Use a hash map to store complements.
+    - One-pass solution is O(N).
+    """
+    seen = {}
+
+    for i, num in enumerate(nums):
+        need = target - num
+        if need in seen:
+            return [seen[need], i]
+        seen[num] = i
+
+    return []
+
+
+def problem_5_valid_parentheses(s):
+    """
+    Problem: Valid Parentheses
+
+    Input: "()[]{}" -> True
+    Input: "(]" -> False
+
+    Interview Tip:
+    - Stack is the only sane choice.
+    - If you see a closing bracket with an empty stack, fail immediately.
+    """
+    stack = []
+    pairs = {')': '(', ']': '[', '}': '{'}
+    opens = set(pairs.values())
+
+    for ch in s:
+        if ch in pairs:
+            if not stack or stack.pop() != pairs[ch]:
+                return False
+        elif ch in opens:
+            stack.append(ch)
+        else:
+            continue
+
+    return not stack
+
+
+def problem_6_product_except_self(nums):
+    """
+    Problem: Product of Array Except Self
+
+    Input: [1, 2, 3, 4]
+    Output: [24, 12, 8, 6]
+
+    Interview Tip:
+    - Use prefix and suffix products (no division).
+    - O(N) time, O(1) extra space (excluding output).
+    """
+    n = len(nums)
+    output = [1] * n
+
+    prefix = 1
+    for i in range(n):
+        output[i] = prefix
+        prefix *= nums[i]
+
+    suffix = 1
+    for i in range(n - 1, -1, -1):
+        output[i] *= suffix
+        suffix *= nums[i]
+
+    return output
+
+
+def problem_7_merge_intervals(intervals):
+    """
+    Problem: Merge Intervals
+
+    Input: [[1,3], [2,6], [8,10], [15,18]]
+    Output: [[1,6], [8,10], [15,18]]
+
+    Interview Tip:
+    - Sort by start, then merge greedily.
+    - Note: This sorts the input list in place.
+    """
+    if not intervals:
+        return []
+
+    intervals.sort(key=lambda x: x[0])
+    merged = [intervals[0]]
+
+    for current in intervals[1:]:
+        last = merged[-1]
+        if current[0] <= last[1]:
+            last[1] = max(last[1], current[1])
+        else:
+            merged.append(current)
+
+    return merged
+
+
+def problem_8_binary_search(nums, target):
+    """
+    Problem: Binary Search
+
+    Input: nums = [1, 3, 5, 7, 9], target = 7
+    Output: 3
+    """
+    left = 0
+    right = len(nums) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1
+
+
+def problem_9_subarray_sum_equals_k(nums, k):
+    """
+    Problem: Subarray Sum Equals K
+
+    Input: nums = [1, 1, 1], k = 2
+    Output: 2
+
+    Interview Tip:
+    - Prefix sum + frequency map.
+    """
+    count = 0
+    prefix = 0
+    freq = {0: 1}
+
+    for num in nums:
+        prefix += num
+        count += freq.get(prefix - k, 0)
+        freq[prefix] = freq.get(prefix, 0) + 1
+
+    return count
+
+
+def problem_10_number_of_islands(grid):
+    """
+    Problem: Number of Islands
+
+    Input:
+    [
+      ["1","1","0","0","0"],
+      ["1","1","0","0","0"],
+      ["0","0","1","0","0"],
+      ["0","0","0","1","1"]
+    ]
+    Output: 3
+
+    Note: This mutates the grid to mark visited cells.
+    """
+    if not grid:
+        return 0
+
+    rows = len(grid)
+    cols = len(grid[0])
+    count = 0
+
+    def dfs(r, c):
+        if r < 0 or r >= rows or c < 0 or c >= cols:
+            return
+        if grid[r][c] != "1":
+            return
+        grid[r][c] = "0"
+        dfs(r + 1, c)
+        dfs(r - 1, c)
+        dfs(r, c + 1)
+        dfs(r, c - 1)
+
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == "1":
+                count += 1
+                dfs(r, c)
+
+    return count
+
+
 if __name__ == "__main__":
     print("--- Problem 1: Reorder Log Files ---")
     logs = ["dig1 8 1 5 1", "let1 art can", "dig2 3 6", "let2 own kit dig", "let3 art zero"]
@@ -119,3 +308,53 @@ if __name__ == "__main__":
     s = "abcabcbb"
     print(f"Input: {s}")
     print(f"Output: {problem_3_longest_substring_without_repeating(s)}")
+    print("\n")
+
+    print("--- Problem 4: Two Sum ---")
+    nums = [2, 7, 11, 15]
+    target = 9
+    print(f"Input: nums={nums}, target={target}")
+    print(f"Output: {problem_4_two_sum(nums, target)}")
+    print("\n")
+
+    print("--- Problem 5: Valid Parentheses ---")
+    s = "()[]{}"
+    print(f"Input: {s}")
+    print(f"Output: {problem_5_valid_parentheses(s)}")
+    print("\n")
+
+    print("--- Problem 6: Product Except Self ---")
+    nums = [1, 2, 3, 4]
+    print(f"Input: {nums}")
+    print(f"Output: {problem_6_product_except_self(nums)}")
+    print("\n")
+
+    print("--- Problem 7: Merge Intervals ---")
+    intervals = [[1, 3], [2, 6], [8, 10], [15, 18]]
+    print(f"Input: {intervals}")
+    print(f"Output: {problem_7_merge_intervals(intervals)}")
+    print("\n")
+
+    print("--- Problem 8: Binary Search ---")
+    nums = [1, 3, 5, 7, 9]
+    target = 7
+    print(f"Input: nums={nums}, target={target}")
+    print(f"Output: {problem_8_binary_search(nums, target)}")
+    print("\n")
+
+    print("--- Problem 9: Subarray Sum Equals K ---")
+    nums = [1, 1, 1]
+    k = 2
+    print(f"Input: nums={nums}, k={k}")
+    print(f"Output: {problem_9_subarray_sum_equals_k(nums, k)}")
+    print("\n")
+
+    print("--- Problem 10: Number of Islands ---")
+    grid = [
+        ["1", "1", "0", "0", "0"],
+        ["1", "1", "0", "0", "0"],
+        ["0", "0", "1", "0", "0"],
+        ["0", "0", "0", "1", "1"],
+    ]
+    print("Input: grid=4x5")
+    print(f"Output: {problem_10_number_of_islands(grid)}")
