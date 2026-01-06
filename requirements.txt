@@ -293,7 +293,7 @@ PyJWT==2.10.1
 pylint==3.3.3
 pymdown-extensions==10.17.2
 pymsalruntime==0.18.0
-PyNaCl==1.5.0
+PyNaCl==1.6.2
 pyOpenSSL==25.0.0
 pyparsing==3.2.1
 pypdf==5.3.1
