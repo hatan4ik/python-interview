@@ -379,7 +379,7 @@ urllib3==2.5.0
 uvicorn==0.30.6
 uvloop==0.21.0
 v2==1.0.7
-virtualenv==20.35.4
+virtualenv==20.36.1
 virtualenv-clone==0.5.7
 virtualenvwrapper==6.1.1
 watchdog==6.0.0
